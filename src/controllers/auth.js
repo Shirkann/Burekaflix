@@ -1,3 +1,5 @@
+import User from "../models/User.js";
+
 // Render login page
 export const loginGet = (req, res) => {
   res.render("auth/login", { error: null });
@@ -10,7 +12,7 @@ export const loginPost = async (req, res) => {
     return res.render("auth/login", { error: "יש למלא את כל השדות" });
   }
   const user = await User.findOne({ email });
-  if (!user || !(await user.verifyPassword(password))) {
+  if (!user || !(await user.validatePassword(password))) {
     return res.render("auth/login", { error: "אימייל או סיסמה שגויים" });
   }
   req.session.user = { id: user._id, email: user.email, isAdmin: user.isAdmin };
@@ -25,7 +27,7 @@ export const registerGet = (req, res) => {
 // Logout
 export const logout = (req, res) => {
   req.session.destroy(() => {
-    res.redirect("/auth/login");
+    res.redirect("/login");
   });
 };
 export const registerPost = async (req, res) => {
