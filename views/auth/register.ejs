@@ -1,1 +1,13 @@
-<% layout('layout') -%><h2>רישום</h2><% if (typeof error!=='undefined'){ %><div class='alert'><%= error %></div><% } %><form method='post' action='/register'><input name='email' placeholder='אימייל'/><input type='password' name='password' placeholder='סיסמה'/><button class='btn'>יצירת משתמש</button></form>
+<% layout('layout') -%>
+
+<h2>רישום</h2>
+
+<% if (typeof error !== 'undefined') { %>
+  <div class="alert"><%= error %></div>
+<% } %>
+
+<form method="post" action="/register">
+  <input name="email" placeholder="אימייל" />
+  <input type="password" name="password" placeholder="סיסמה" />
+  <button class="btn">יצירת משתמש</button>
+</form>

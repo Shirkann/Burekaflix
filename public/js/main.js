@@ -1,1 +1,11 @@
-const $=(s,c=document)=>c.querySelector(s);document.addEventListener('DOMContentLoaded',()=>{const q=$('#q'); if(q){q.addEventListener('input',()=>{location.href='/catalog?q='+encodeURIComponent(q.value.trim())})}});
+const $ = (s, c = document) => c.querySelector(s);
+
+document.addEventListener('DOMContentLoaded', () => {
+  const q = $('#q');
+  
+  if (q) {
+    q.addEventListener('input', () => {
+      location.href = '/catalog?q=' + encodeURIComponent(q.value.trim());
+    });
+  }
+});

@@ -1,1 +1,23 @@
-<% layout('layout') -%><h2>הוספת תוכן</h2><form method='post' action='/admin/add'><input name='title' placeholder='שם' required><select name='type'><option value='movie'>סרט</option><option value='series'>סדרה</option></select><input name='year' type='number' placeholder='שנה'><input name='genres' placeholder='ז׳אנרים (פסיקים)'><textarea name='summary' rows='3' placeholder='תיאור'></textarea><input name='posterUrl' placeholder='Poster URL'><input name='videoUrl' placeholder='Trailer URL'><input name='wikipedia' placeholder='ויקיפדיה'><button class='btn' style='margin-top:8px'>הוספה</button></form>
+<% layout('layout') -%>
+
+<h2>הוספת תוכן</h2>
+
+<form method="post" action="/admin/add">
+  <input name="title" placeholder="שם" required />
+
+  <select name="type">
+    <option value="movie">סרט</option>
+    <option value="series">סדרה</option>
+  </select>
+
+  <input name="year" type="number" placeholder="שנה" />
+  <input name="genres" placeholder="ז׳אנרים (פסיקים)" />
+  
+  <textarea name="summary" rows="3" placeholder="תיאור"></textarea>
+  
+  <input name="posterUrl" placeholder="Poster URL" />
+  <input name="videoUrl" placeholder="Trailer URL" />
+  <input name="wikipedia" placeholder="ויקיפדיה" />
+
+  <button class="btn" style="margin-top:8px">הוספה</button>
+</form>

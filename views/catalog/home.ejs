@@ -1,1 +1,41 @@
-<% layout('layout') -%><section class='hero'><h2>כחול-לבן, טעים ומצחיק</h2><p>אתר לסרטי בורקס בעיצוב מודרני שמזכיר נטפליקס.</p><form style='margin-top:10px'><input id='q' name='q' value='<%= q %>' placeholder='חפש/י סרט...'></form></section><section class='row'><h3>מומלצים</h3><div class='scroller'><% popular.forEach(i=>{ %><a class='card' href='/content/<%= i._id %>'><img src='<%= i.posterUrl %>'/><div class='info'><h4><%= i.title %></h4><div class='meta'><%= i.year %></div></div></a><% }) %></div></section><% Object.keys(newestByGenre).forEach(g=>{ %><section class='row'><h3><%= g %></h3><div class='scroller'><% newestByGenre[g].forEach(i=>{ %><a class='card' href='/content/<%= i._id %>'><img src='<%= i.posterUrl %>'/><div class='info'><h4><%= i.title %></h4><div class='meta'><%= i.year %></div></div></a><% }) %></div></section><% }) %>
+<% layout('layout') -%>
+
+<section class="hero">
+  <h2>כחול-לבן, טעים ומצחיק</h2>
+  <p>אתר לסרטי בורקס בעיצוב מודרני שמזכיר נטפליקס.</p>
+  <form style="margin-top:10px">
+    <input id="q" name="q" value="<%= q %>" placeholder="חפש/י סרט..." />
+  </form>
+</section>
+
+<section class="row">
+  <h3>מומלצים</h3>
+  <div class="scroller">
+    <% popular.forEach(i => { %>
+      <a class="card" href="/content/<%= i._id %>">
+        <img src="<%= i.posterUrl %>" />
+        <div class="info">
+          <h4><%= i.title %></h4>
+          <div class="meta"><%= i.year %></div>
+        </div>
+      </a>
+    <% }) %>
+  </div>
+</section>
+
+<% Object.keys(newestByGenre).forEach(g => { %>
+  <section class="row">
+    <h3><%= g %></h3>
+    <div class="scroller">
+      <% newestByGenre[g].forEach(i => { %>
+        <a class="card" href="/content/<%= i._id %>">
+          <img src="<%= i.posterUrl %>" />
+          <div class="info">
+            <h4><%= i.title %></h4>
+            <div class="meta"><%= i.year %></div>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  </section>
+<% }) %>
