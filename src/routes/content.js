@@ -1,0 +1,1 @@
+import {Router} from 'express'; import {auth,profile} from './guards.js'; import {details,like} from '../controllers/content.js'; const r=Router(); r.use(auth); r.get('/:id',profile,details); r.post('/:id/like',profile,like); export default r;
