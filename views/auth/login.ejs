@@ -1,18 +1,35 @@
 <% layout('layout') -%>
 
-<h2>כניסה</h2>
+<section class="hero" aria-label="מסך כניסה">
+  <h1 class="project-title">
+    <%= typeof projectName !== 'undefined' ? projectName : 'BurekaFlix' %>
+  </h1>
+  <h2 class="screen-title">כניסה</h2>
 
-<% if (typeof error !== 'undefined') { %>
+  <% if (typeof error !== 'undefined' && error) { %>
   <div class="alert"><%= error %></div>
-<% } %>
+  <% } %>
 
-<form method="post" action="/login">
-  <input name="email" placeholder="אימייל" />
-  <input type="password" name="password" placeholder="סיסמה" />
-  <button class="btn">כניסה</button>
-</form>
+  <form class="row" action="/login" method="post" autocomplete="on">
+    <input
+      type="text"
+      name="email"
+      placeholder="שם משתמש"
+      autocomplete="username"
+      inputmode="email"
+      spellcheck="false"
+      required
+    />
+    <input
+      type="password"
+      name="password"
+      placeholder="סיסמה"
+      autocomplete="current-password"
+      required
+    />
+    <button class="btn" type="submit">כניסה</button>
+  </form>
 
-<p>
-  אין משתמש?
-  <a href="/register">הרשמה</a>
-</p>
+  <p class="info">אין לכם משתמש? <a href="/register">הרשמה</a></p>
+  <p class="info">באהבה לקולנוע הישראלי 🇮🇱</p>
+</section>

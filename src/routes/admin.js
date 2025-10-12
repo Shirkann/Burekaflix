@@ -1,1 +1,5 @@
-import {Router} from 'express'; import {auth} from './guards.js'; import {gate,addForm,create} from '../controllers/admin.js'; const r=Router(); r.use(auth); r.use(gate); r.get('/add',addForm); r.post('/add',create); export default r;
+import {Router} from 'express';
+import {auth} from './guards.js';
+import {gate,addForm,create} from '../controllers/admin.js';
+const r=Router(); r.use(auth); r.use(gate); r.get('/add',addForm);
+r.post('/add',create); export default r;

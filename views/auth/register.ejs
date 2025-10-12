@@ -1,13 +1,47 @@
-<% layout('layout') -%>
+<main class="container" dir="rtl">
+  <section class="hero">
+    <h1 class="project-title">BurekaFlix</h1>
+    <h2 class="screen-title">רישום</h2>
 
-<h2>רישום</h2>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert"><%= error %></div>
+    <% } %>
 
-<% if (typeof error !== 'undefined') { %>
-  <div class="alert"><%= error %></div>
-<% } %>
+    <form class="row" action="/register" method="POST" novalidate>
+      <% if (locals.csrfToken) { %>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <% } %>
 
-<form method="post" action="/register">
-  <input name="email" placeholder="אימייל" />
-  <input type="password" name="password" placeholder="סיסמה" />
-  <button class="btn">יצירת משתמש</button>
-</form>
+      <input
+        type="email"
+        name="email"
+        placeholder="שם משתמש"
+        required
+        autocomplete="email"
+      />
+      <input
+        type="password"
+        name="password"
+        placeholder="סיסמה"
+        required
+        autocomplete="new-password"
+      />
+      <input
+        type="password"
+        name="confirmPassword"
+        placeholder="אישור סיסמה"
+        required
+        autocomplete="new-password"
+      />
+
+      <button class="btn" type="submit">הרשמה</button>
+    </form>
+
+    <p class="form-links">
+      כבר יש לכם משתמש?
+      <a href="/login">כניסה</a>
+    </p>
+
+    <p class="footnote">🇮🇱 באהבה לקולנוע הישראלי</p>
+  </section>
+</main>

@@ -1,26 +1,47 @@
 <% layout('layout') -%>
 
-<h2>מי צופה?</h2>
+<section class="hero profiles-hero" aria-label="בחירת פרופיל">
+  <h1>שלום <%= (currentUser && currentUser.name) ? currentUser.name : 'לך' %>!</h1>
 
-<div class="grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:12px">
-  <% profiles.forEach(p => { %>
-    <div class="card">
-      <div class="info">
-        <h4><%= p.name %></h4>
-        <a class="btn" href="/profiles/select/<%= p._id %>">בחירה</a>
-        <form method="post" action="/profiles/delete/<%= p._id %>" onsubmit='return confirm("למחוק?")'>
-          <button class="btn" style="margin-top:6px">מחיקה</button>
-        </form>
-      </div>
-    </div>
-  <% }) %>
+  <div class="scroller profiles">
+    <% (profiles || []).forEach(function(p, i){ %>
+      <article class="card profile">
+        <div class="info" style="text-align:center;">
+          <div style="font-weight:800; font-size:22px; margin-bottom:12px;">
+            <%= p.name || (i+1) %>
+          </div>
 
-  <div class="card">
-    <div class="info">
-      <form method="post" action="/profiles">
-        <input name="name" placeholder="שם">
-        <button class="btn" style="margin-top:6px">הוספה</button>
+          <!-- בחירת פרופיל -->
+          <form action="/profiles/select/<%= p._id %>" method="get" style="display:grid; place-items:center; gap:8px;">
+            <button class="btn" type="submit" style="width:140px;">היכנסו</button>
+          </form>
+
+          <!-- מחיקה -->
+          <form action="/profiles/delete/<%= p._id %>" method="post" style="margin-top:8px;">
+            <button class="chip danger" type="submit">מחק פרופיל</button>
+          </form>
+        </div>
+      </article>
+    <% }) %>
+
+    <% if (!profiles || profiles.length < 5) { %>
+      <!-- יצירת פרופיל עם שם -->
+      <form action="/profiles" method="post" class="card profile add" style="display:grid; place-items:center; gap:12px; padding:16px;">
+        <div class="plus" aria-hidden="true">+</div>
+        <div style="margin-top:4px;font-weight:700;">הוספת פרופיל</div>
+
+        <input
+          type="text"
+          name="name"
+          placeholder="שם הפרופיל"
+          required
+          style="width:100%; max-width:200px; padding:10px 12px; border-radius:8px; border:none; outline:none;
+                 font-size:14px; background:#f5f9ff; color:#0b0f27; direction:rtl; text-align:right;" />
+
+        <button class="btn" type="submit" style="width:140px;">יצירה</button>
       </form>
-    </div>
+    <% } %>
   </div>
-</div>
+
+  <p class="info" style="text-align:center;">ניתן ליצור עד 5 פרופילים לכל משתמש</p>
+</section>
