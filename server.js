@@ -15,9 +15,39 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const MONGO_URI =
-  process.env.MONGO_URI || "mongodb+srv://admin_burekaflix:<db_password>@burekaflix.c97tbrj.mongodb.net/?appName=BurekaFlix";
+  process.env.MONGO_URI ;
 
-await mongoose.connect(MONGO_URI);
+mongoose.connect(MONGO_URI);
+
+// Add a log to confirm MongoDB connection success
+mongoose.connection.on('connected', () => {
+  console.log('MongoDB connected successfully.');
+});
+
+// Log the name of the connected database
+mongoose.connection.on('connected', async () => {
+  try {
+    const dbName = mongoose.connection.db.databaseName;
+    console.log(`Connected to MongoDB database: ${dbName}`);
+  } catch (error) {
+    console.error('Failed to retrieve database name:', error);
+  }
+});
+
+// Log all collections in the connected database
+mongoose.connection.on('connected', async () => {
+  try {
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    console.log('Collections in the database:');
+    collections.forEach((collection) => console.log(`- ${collection.name}`));
+  } catch (error) {
+    console.error('Failed to list collections:', error);
+  }
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
 
 // Views removed: serving static HTML from public/
 
@@ -62,6 +92,17 @@ app.use("/api", api);
 app.get("/", (req, res) =>
   !req.session.user ? res.redirect("/login") : res.redirect("/catalog")
 );
+
+// Add a MongoDB connection test route
+app.get('/test-mongo', async (req, res) => {
+  try {
+    await mongoose.connection.db.admin().ping();
+    res.status(200).send('MongoDB connection is working correctly.');
+  } catch (error) {
+    console.error('MongoDB connection test failed:', error);
+    res.status(500).send('MongoDB connection test failed. Check server logs for details.');
+  }
+});
 
 app.use((req, res) => res.status(404).sendFile(path.join(__dirname, 'public', 'errors', '404.html')));
 
