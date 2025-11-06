@@ -1,7 +1,14 @@
 import User from "../models/User.js";
+import path from "path";
+
 export const index = async (req, res) => {
+  // Serve the static profiles page; client JS will fetch profiles via /profiles/api
+  return res.sendFile(path.join(process.cwd(), "public", "profiles.html"));
+};
+
+export const apiList = async (req, res) => {
   const u = await User.findById(req.session.user.id);
-  res.render("profiles/index", { profiles: u.profiles });
+  return res.json(u.profiles || []);
 };
 export const create = async (req, res) => {
   const u = await User.findById(req.session.user.id);

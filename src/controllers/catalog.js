@@ -1,35 +1,17 @@
 import Content from "../models/Content.js";
 import User from "../models/User.js";
+import path from "path";
+
 export const home = async (req, res) => {
-  const q = req.query.q || "";
-  const filter = q ? { title: new RegExp(q, "i") } : {};
-  const popular = await Content.find(filter).sort({ popularity: -1 }).limit(12);
-  const genres = await Content.distinct("genres");
-  const newestByGenre = {};
-  for (const g of genres) {
-    newestByGenre[g] = await Content.find({ genres: g })
-      .sort({ createdAt: -1 })
-      .limit(10);
-  }
-  let cw = [];
-  if (req.session.profile) {
-    const u = await User.findById(req.session.user.id).populate(
-      "profiles.liked"
-    );
-    const p = u.profiles.find((p) => String(p._id) === req.session.profile);
-    cw = p?.liked || [];
-  }
-  res.render("catalog/home", {
-    popular,
-    newestByGenre,
-    q,
-    genres,
-    continueWatching: cw,
-  });
+  // Serve the static catalog page; the client will fetch data from /api
+  return res.sendFile(path.join(process.cwd(), "public", "catalog.html"));
 };
 export const byGenre = async (req, res) => {
+  // Keep existing server-side genre rendering for backward compatibility
   const items = await Content.find({ genres: req.params.genre })
     .sort({ popularity: -1 })
     .limit(60);
-  res.render("catalog/genre", { genre: req.params.genre, items });
+  // For now, send static page as well — client can call /api/genre/:genre
+  return res.sendFile(path.join(process.cwd(), "public", "catalog.html"));
 };
+// (previous server-side render removed; client will use /api/genre/:genre)

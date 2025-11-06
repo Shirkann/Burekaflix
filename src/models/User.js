@@ -22,4 +22,5 @@ UserSchema.methods.setPassword = async function (pw) {
 UserSchema.methods.validatePassword = function (pw) {
   return bcrypt.compare(pw, this.passwordHash);
 };
+UserSchema.methods.verifyPassword = UserSchema.methods.validatePassword;
 export default mongoose.model("User", UserSchema);

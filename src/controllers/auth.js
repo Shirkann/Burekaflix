@@ -1,33 +1,35 @@
+// Render login page
+import path from "path";
 import User from "../models/User.js";
 
-// Render login page
 export const loginGet = (req, res) => {
-  res.render("auth/login", { error: null });
+  // serve static login page
+  return res.sendFile(path.join(process.cwd(), "public", "login.html"));
 };
 
 // Handle login POST
 export const loginPost = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.render("auth/login", { error: "יש למלא את כל השדות" });
+    return res.redirect('/login?error=' + encodeURIComponent('יש למלא את כל השדות'));
   }
   const user = await User.findOne({ email });
-  if (!user || !(await user.validatePassword(password))) {
-    return res.render("auth/login", { error: "אימייל או סיסמה שגויים" });
+  if (!user || !(await user.verifyPassword(password))) {
+    return res.redirect('/login?error=' + encodeURIComponent('אימייל או סיסמה שגויים'));
   }
   req.session.user = { id: user._id, email: user.email, isAdmin: user.isAdmin };
-  res.redirect("/profiles");
+  res.redirect('/profiles');
 };
 
 // Render register page
 export const registerGet = (req, res) => {
-  res.render("auth/register", { error: null });
+  return res.sendFile(path.join(process.cwd(), "public", "register.html"));
 };
 
 // Logout
 export const logout = (req, res) => {
   req.session.destroy(() => {
-    res.redirect("/login");
+    res.redirect('/login');
   });
 };
 export const registerPost = async (req, res) => {
@@ -36,15 +38,15 @@ export const registerPost = async (req, res) => {
   console.log("REGISTER BODY:", req.body); // לבדיקה – תראה בטרמינל
 
   if (!email || !password || !confirmPassword) {
-    return res.render("auth/register", { error: "יש למלא את כל השדות" });
+    return res.redirect('/register?error=' + encodeURIComponent('יש למלא את כל השדות'));
   }
 
   if (password !== confirmPassword) {
-    return res.render("auth/register", { error: "הסיסמאות אינן תואמות" });
+    return res.redirect('/register?error=' + encodeURIComponent('הסיסמאות אינן תואמות'));
   }
 
   if (await User.findOne({ email })) {
-    return res.render("auth/register", { error: "משתמש כבר קיים" });
+    return res.redirect('/register?error=' + encodeURIComponent('משתמש כבר קיים'));
   }
 
   const u = new User({ email });

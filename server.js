@@ -7,7 +7,6 @@ import morgan from "morgan";
 import methodOverride from "method-override";
 import mongoose from "mongoose";
 import { fileURLToPath } from "url";
-import ejsMate from "ejs-mate";
 
 dotenv.config();
 
@@ -16,14 +15,41 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const MONGO_URI =
-  process.env.MONGO_URI || "mongodb://localhost:27017/burekaflix";
+  process.env.MONGO_URI ;
 
-await mongoose.connect(MONGO_URI);
+mongoose.connect(MONGO_URI);
 
-app.engine("ejs", ejsMate);
-app.locals._layoutFile = "layout";
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+// Add a log to confirm MongoDB connection success
+mongoose.connection.on('connected', () => {
+  console.log('MongoDB connected successfully.');
+});
+
+// Log the name of the connected database
+mongoose.connection.on('connected', async () => {
+  try {
+    const dbName = mongoose.connection.db.databaseName;
+    console.log(`Connected to MongoDB database: ${dbName}`);
+  } catch (error) {
+    console.error('Failed to retrieve database name:', error);
+  }
+});
+
+// Log all collections in the connected database
+mongoose.connection.on('connected', async () => {
+  try {
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    console.log('Collections in the database:');
+    collections.forEach((collection) => console.log(`- ${collection.name}`));
+  } catch (error) {
+    console.error('Failed to list collections:', error);
+  }
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
+// Views removed: serving static HTML from public/
 
 app.use(
   session({
@@ -40,6 +66,9 @@ app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
+// serve repository root logo file (user added `logo.png` at project root)
+app.get('/logo.png', (req, res) => res.sendFile(path.join(__dirname, 'logo.png')));
+
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   res.locals.currentProfile = req.session.profile || null;
@@ -51,22 +80,35 @@ import profiles from "./src/routes/profiles.js";
 import catalog from "./src/routes/catalog.js";
 import content from "./src/routes/content.js";
 import admin from "./src/routes/admin.js";
+import api from "./src/routes/api.js";
 
 app.use("/", auth);
 app.use("/profiles", profiles);
 app.use("/catalog", catalog);
 app.use("/content", content);
 app.use("/admin", admin);
+app.use("/api", api);
 
 app.get("/", (req, res) =>
   !req.session.user ? res.redirect("/login") : res.redirect("/catalog")
 );
 
-app.use((req, res) => res.status(404).render("errors/404"));
+// Add a MongoDB connection test route
+app.get('/test-mongo', async (req, res) => {
+  try {
+    await mongoose.connection.db.admin().ping();
+    res.status(200).send('MongoDB connection is working correctly.');
+  } catch (error) {
+    console.error('MongoDB connection test failed:', error);
+    res.status(500).send('MongoDB connection test failed. Check server logs for details.');
+  }
+});
+
+app.use((req, res) => res.status(404).sendFile(path.join(__dirname, 'public', 'errors', '404.html')));
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).render("errors/500", { error: err });
+  res.status(500).sendFile(path.join(__dirname, 'public', 'errors', '500.html'));
 });
 
 const PORT = process.env.PORT || 3000;
