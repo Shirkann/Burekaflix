@@ -56,6 +56,7 @@ export const profilesRecommendations = async (req, res) => {
 
 export const contentDetails = async (req, res) => {
   const c = await Content.findById(req.params.id);
+  console.log("Fetched content details:", c); // Debugging
   if (!c) return res.status(404).json({ error: 'not found' });
   res.json(c);
 };

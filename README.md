@@ -1,4 +1,3 @@
-
 # BurekaFlix – Full Stack (Node + Express + MongoDB)
 פרויקט מלא בסגנון נטפליקס כחול-לבן לסרטי בורקס. כולל הגדרת ejs-mate (layout).
 
@@ -6,7 +5,7 @@
 ```bash
 npm install
 cp .env.sample .env   # Windows: copy .env.sample .env
-# עריכת .env אם צריך (MONGO_URI/SESSION_SECRET)
+# עריכת .env אם צריך (MONGO_URI בלבד)
 npm run seed
 npm run dev           # http://localhost:3000
 ```

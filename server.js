@@ -53,7 +53,6 @@ mongoose.connection.on('error', (err) => {
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "dev",
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: MONGO_URI }),
