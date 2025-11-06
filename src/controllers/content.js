@@ -1,21 +1,11 @@
 import Content from "../models/Content.js";
 import User from "../models/User.js";
 import { omdb } from "../services/ratings.js";
+import path from "path";
+
 export const details = async (req, res) => {
-  const c = await Content.findById(req.params.id);
-  if (!c) return res.render("errors/404");
-  if (!c.rating) {
-    const r = await omdb(c.title, c.year);
-    if (r) {
-      c.rating = r;
-      await c.save();
-    }
-  }
-  const similar = await Content.find({
-    genres: { $in: c.genres },
-    _id: { $ne: c._id },
-  }).limit(10);
-  res.render("content/details", { content: c, similar });
+  // Serve a static content details page; client will fetch /api/content/:id
+  return res.sendFile(path.join(process.cwd(), "public", "content.html"));
 };
 export const like = async (req, res) => {
   const u = await User.findById(req.session.user.id);
