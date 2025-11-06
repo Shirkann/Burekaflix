@@ -16,5 +16,5 @@ npm run dev           # http://localhost:3000
 ```js
 // במונגו (mongosh):
 use burekaflix
-db.users.updateOne({ email: "you@example.com" }, { $set: { isAdmin: true } })
+db.users.updateOne({ username: "you" }, { $set: { isAdmin: true } })
 ```
