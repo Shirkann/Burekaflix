@@ -9,7 +9,7 @@ const Profile = new mongoose.Schema(
 );
 const UserSchema = new mongoose.Schema(
   {
-    email: { type: String, unique: true, required: true },
+    username: { type: String, unique: true, required: true },
     passwordHash: { type: String, required: true },
     isAdmin: { type: Boolean, default: false },
     profiles: { type: [Profile], default: [] },
