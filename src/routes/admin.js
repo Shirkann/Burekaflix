@@ -10,8 +10,6 @@ function requireAdmin(req, res, next) {
 }
 
 router.get('/add', requireAdmin, (req, res) => {
-  // אם שמרת את ה-HTML כ-ejs אפשר: res.render('admin-add');
-  // אם בקובץ סטטי: פשוט תגישו אותו כסטטי. כאן נחזיר OK כדי שיהיה minimal.
   res.send('Use your existing HTML form that posts to POST /admin/add');
 });
 
