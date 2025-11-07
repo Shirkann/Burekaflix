@@ -1,37 +1,31 @@
-const express = require('express');
-const axios = require('axios');
-const router = express.Router();
-const Content = require('../models/Content');
+import express from 'express';
+import axios from 'axios';
+import Content from '../models/Content.js';
 
-// אימות אדמין בסיסי (דמו). מומלץ להחליף במנגנון התחברות אמיתי.
+const router = express.Router();
+
 function requireAdmin(req, res, next) {
   if (req.session?.user?.username === 'admin') return next();
   return res.status(401).send('Unauthorized');
 }
 
-// הצגת הטופס (אם הוא קובץ סטטי ב-/public, אפשר להגיש אותו ישירות מהסטטיק)
 router.get('/add', requireAdmin, (req, res) => {
-  // אם שמרת את ה-HTML כ-ejs אפשר: res.render('admin-add');
-  // אם בקובץ סטטי: פשוט תגישו אותו כסטטי. כאן נחזיר OK כדי שיהיה minimal.
+
   res.send('Use your existing HTML form that posts to POST /admin/add');
 });
 
-// קליטת הטופס מהדף שהצגת
 router.post('/add', requireAdmin, async (req, res) => {
   try {
     let { title, type, year, genres, summary, posterUrl, videoUrl, wikipedia } = req.body;
 
-    // ולידציה בסיסית
     if (!title) return res.status(400).send('נדרש שם תוכן');
     if (type && !['movie', 'series'].includes(type)) type = 'movie';
 
-    // פיצול ז׳אנרים מפסיקים
     const genresList = (genres || '')
       .split(',')
       .map(s => s.trim())
       .filter(Boolean);
 
-    // שליפת דירוג + השלמת פוסטר (אם חסר) מ-OMDb
     let rating = undefined;
     const apiKey = process.env.OMDB_API_KEY;
     if (apiKey) {
@@ -70,8 +64,6 @@ router.post('/add', requireAdmin, async (req, res) => {
       ratingSrc: rating ? 'OMDb' : undefined
     });
 
-    // החזרה פשוטה: אפשר להפנות לרשימה / להחזיר JSON / להציג הודעת הצלחה
-    // אם אתה רוצה חזרה לעמוד הטופס עם הודעה:
     res.status(201).send(`נוסף בהצלחה (${doc.title}) – id: ${doc._id}`);
   } catch (err) {
     console.error(err);
@@ -79,4 +71,4 @@ router.post('/add', requireAdmin, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -8,6 +8,7 @@
     "seed": "node seed/seed.js"
   },
   "dependencies": {
+    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "connect-mongo": "^5.1.0",
     "dotenv": "^16.4.5",
