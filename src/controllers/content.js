@@ -4,7 +4,6 @@ import { omdb } from "../services/ratings.js";
 import path from "path";
 
 export const details = async (req, res) => {
-  // Serve a static content details page; client will fetch /api/content/:id
   return res.sendFile(path.join(process.cwd(), "public", "content.html"));
 };
 export const like = async (req, res) => {

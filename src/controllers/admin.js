@@ -7,15 +7,11 @@ import Content from '../models/Content.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// מראה את טופס ההוספה. אם יש לך קובץ סטטי ב-public/admin-add.html — נגיש אותו.
 export function addForm(req, res) {
-  // אם אתה משתמש ב-EJS: החזר res.render('admin-add')
-  // כאן נגיש את הקובץ הסטטי שהצגת:
   const htmlPath = path.join(__dirname, '..', 'public', 'admin-add.html');
   return res.sendFile(htmlPath);
 }
 
-// POST /admin/add – יוצר רשומת תוכן ב-DB, משלים דירוג/פוסטר מ-OMDb אם חסרים.
 export async function create(req, res) {
   try {
     let { title, type, year, genres, summary, posterUrl, videoUrl, wikipedia } = req.body;
@@ -31,7 +27,6 @@ export async function create(req, res) {
       .map(s => s.trim())
       .filter(Boolean);
 
-    // שליפת דירוג + פוסטר מ-OMDb (אם יש api key)
     let rating = undefined;
     const apiKey = process.env.OMDB_API_KEY;
 
@@ -81,5 +76,3 @@ export async function create(req, res) {
     return res.status(500).send('שגיאה בשמירת התוכן');
   }
 }
-
-// אופציונלי: אפשר להוסיף כאן גם edit/update/delete בהמשך

@@ -2,7 +2,6 @@ import User from "../models/User.js";
 import path from "path";
 
 export const index = async (req, res) => {
-  // Serve the static profiles page; client JS will fetch profiles via /profiles/api
   return res.sendFile(path.join(process.cwd(), "public", "profiles.html"));
 };
 

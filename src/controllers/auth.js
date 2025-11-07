@@ -1,13 +1,10 @@
-// Render login page
 import path from "path";
 import User from "../models/User.js";
 
 export const loginGet = (req, res) => {
-  // serve static login page
   return res.sendFile(path.join(process.cwd(), "public", "login.html"));
 };
 
-// Handle login POST
 export const loginPost = async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -21,12 +18,10 @@ export const loginPost = async (req, res) => {
   res.redirect('/profiles');
 };
 
-// Render register page
 export const registerGet = (req, res) => {
   return res.sendFile(path.join(process.cwd(), "public", "register.html"));
 };
 
-// Logout
 export const logout = (req, res) => {
   req.session.destroy(() => {
     res.redirect('/login');

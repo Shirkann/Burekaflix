@@ -9,11 +9,9 @@ import {
 
 const r = Router();
 
-// מסכי טפסים
 r.get("/login", loginGet);
 r.get("/register", registerGet);
 
-// פעולות
 r.post("/login", loginPost);
 r.post("/register", registerPost);
 r.post("/logout", logout);
