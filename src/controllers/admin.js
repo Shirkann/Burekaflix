@@ -1,6 +1,6 @@
-import axios from "axios";
 import fs from "fs/promises";
 import Content from "../models/Content.js";
+import { fetchOmdbDetails } from "../services/ratings.js";
 
 export function addForm(req, res) {
   let message = null;
@@ -72,37 +72,22 @@ export async function create(req, res) {
 
     stagemanager = stagemanager.trim();
 
-    let rating = undefined;
-    const apiKey = process.env.OMDB_API_KEY;
+    let imdbRating = undefined;
+    let ratingSrc = undefined;
 
-    if (apiKey) {
-      try {
-        const params = new URLSearchParams();
-        params.append("t", title);
-        if (year) {
-          params.append("y", String(year));
+    try {
+      const omdbData = await fetchOmdbDetails({ title, year });
+      if (omdbData) {
+        if (typeof omdbData.imdbRating === "number") {
+          imdbRating = omdbData.imdbRating;
+          ratingSrc = "OMDb";
         }
-        params.append("apikey", apiKey);
-
-        const response = await axios.get(
-          "https://www.omdbapi.com/?" + params.toString(),
-        );
-        const data = response.data;
-        if (data && data.Response !== "False") {
-          if (data.imdbRating && data.imdbRating !== "N/A") {
-            rating = Number(data.imdbRating);
-          }
-          if (
-            (!posterUrl || !posterUrl.trim()) &&
-            data.Poster &&
-            data.Poster !== "N/A"
-          ) {
-            posterUrl = data.Poster;
-          }
+        if (!posterUrl?.trim() && omdbData.posterUrl) {
+          posterUrl = omdbData.posterUrl;
         }
-      } catch (error) {
-        console.warn("OMDb fetch failed:", error.message);
       }
+    } catch (error) {
+      console.warn("OMDb fetch failed:", error.message);
     }
 
     const doc = await Content.create({
@@ -117,8 +102,9 @@ export async function create(req, res) {
       videoUrl: primaryVideoFile,
       episodes: episodesList,
       wikipedia: wikipedia.trim() || undefined,
-      rating,
-      ratingSrc: rating ? "OMDb" : undefined,
+      rating: imdbRating,
+      imdb_rating: imdbRating,
+      ratingSrc,
     });
 
     return res.redirect(
