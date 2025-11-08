@@ -5,45 +5,62 @@ const OMDB_ENDPOINT = "https://www.omdbapi.com/";
 function normalizeRating(value) {
   if (!value || value === "N/A") return null;
   const asNumber = Number(value);
-  return Number.isFinite(asNumber) ? asNumber : null;
+  if (Number.isFinite(asNumber)) {
+    return asNumber;
+  }
+  return null;
 }
 
-function buildUrl({ title, year, apiKey }) {
+function buildUrl({ title, apiKey }) {
   const params = new URLSearchParams();
-  params.append("t", title.trim());
-  if (year) params.append("y", String(year));
+  params.append("t", title);
   params.append("apikey", apiKey);
   return `${OMDB_ENDPOINT}?${params.toString()}`;
 }
 
-export async function fetchOmdbDetails({ title, year } = {}) {
+export async function fetchOmdbDetails({ title } = {}) {
   const apiKey = process.env.OMDB_API_KEY;
-  if (!apiKey || !title?.trim()) return null;
+  if (!apiKey || !title) return null;
 
-  const url = buildUrl({ title, year, apiKey });
+  const trimmedTitle = title.trim();
+  if (!trimmedTitle) return null;
 
+  const url = buildUrl({ title, apiKey });
+
+  let data;
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`OMDb responded with status ${response.status}`);
-    const data = await response.json();
-    if (data?.Response === "False") return null;
-
-    const imdbRating = normalizeRating(data?.imdbRating);
-    const posterUrl =
-      data?.Poster && data.Poster !== "N/A" ? data.Poster : undefined;
-
-    return {
-      imdbRating: imdbRating ?? undefined,
-      posterUrl,
-      raw: data,
-    };
+    if (!response.ok) {
+      throw new Error(`OMDb responded with status ${response.status}`);
+    }
+    data = await response.json();
   } catch (error) {
     console.warn("OMDb request failed:", error.message);
     return null;
   }
+
+  if (data && data.Response === "False") return null;
+
+  const imdbRating = normalizeRating(data ? data.imdbRating : null);
+  let posterUrl;
+  if (data && data.Poster && data.Poster !== "N/A") {
+    posterUrl = data.Poster;
+  }
+
+  const result = { raw: data };
+  if (typeof imdbRating === "number") {
+    result.imdbRating = imdbRating;
+  }
+  if (posterUrl) {
+    result.posterUrl = posterUrl;
+  }
+  return result;
 }
 
-export async function omdb(title, year) {
-  const details = await fetchOmdbDetails({ title, year });
-  return details?.imdbRating ?? null;
+export async function omdb(title) {
+  const details = await fetchOmdbDetails({ title });
+  if (details && typeof details.imdbRating === "number") {
+    return details.imdbRating;
+  }
+  return null;
 }

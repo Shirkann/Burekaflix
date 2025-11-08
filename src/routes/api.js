@@ -10,6 +10,7 @@ import {
   profilesRecommendations,
 } from "../controllers/api.js";
 
+
 const r = Router();
 
 r.get("/catalog", auth, catalogList);

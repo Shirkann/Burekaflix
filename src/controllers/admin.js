@@ -76,7 +76,7 @@ export async function create(req, res) {
     let ratingSrc = undefined;
 
     try {
-      const omdbData = await fetchOmdbDetails({ title, year });
+      const omdbData = await fetchOmdbDetails({ title });
       if (omdbData) {
         if (typeof omdbData.imdbRating === "number") {
           imdbRating = omdbData.imdbRating;
