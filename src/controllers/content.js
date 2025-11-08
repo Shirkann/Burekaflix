@@ -1,12 +1,6 @@
-import Content from "../models/Content.js";
 import User from "../models/User.js";
 
-export const details = async (req, res) => {
-  if (req.prefersJson) {
-    const content = await Content.findById(req.params.id).lean();
-    if (!content) return res.status(404).json({ error: "not found" });
-    return res.json(content);
-  }
+export const details = (req, res) => {
   return res.render("content/show");
 };
 export const like = async (req, res) => {

@@ -3,12 +3,16 @@ const $ = (s, c = document) => c.querySelector(s);
 const renderMovies = (movies) => {
   const movieList = $("#movie-list");
   if (movieList) {
-    movieList.innerHTML = movies.map(movie => `
+    movieList.innerHTML = movies
+      .map(
+        (movie) => `
       <div class="movie">
         <h3>${movie.title}</h3>
         <p>${movie.description}</p>
       </div>
-    `).join("");
+    `,
+      )
+      .join("");
   }
 };
 
