@@ -154,6 +154,7 @@
             likeBtn.addEventListener("click", async () => {
               likeBtn.disabled = true;
               try {
+
                 c.likedByUser = !c.likedByUser;
                 likeBtn.classList.remove("btn-outline-primary", "btn-success");
                 likeBtn.classList.add(c.likedByUser ? "btn-success" : "btn-outline-primary");
