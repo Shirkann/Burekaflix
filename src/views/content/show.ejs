@@ -156,7 +156,6 @@
               try {
 
                 c.likedByUser = !c.likedByUser;
-                console.log(liked);
                 likeBtn.classList.remove("btn-outline-primary", "btn-success");
                 likeBtn.classList.add(c.likedByUser ? "btn-success" : "btn-outline-primary");
                 likeBtn.textContent = c.likedByUser ? "אהבת ❤" : "אהבתי";
