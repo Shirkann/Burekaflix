@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>בחירת פרופיל - BurekaFlix</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+      body { background: #f5f7fb; }
+      .hero { max-width:1000px; margin:6vh auto; background:#fff; padding:2rem; border-radius:10px; box-shadow:0 6px 20px rgba(3,10,42,0.06); }
+      .scroller.profiles { display:flex; gap:14px; overflow:auto; padding:12px 6px; }
+      .card.profile { min-width:180px; max-width:180px; display:flex; align-items:center; justify-content:center; padding:12px; border-radius:8px; }
+      .plus { font-size:34px; color:#1976d2; }
+    </style>
+  </head>
+  <body>
+    <%- include('../partial/header', { activePage: 'profiles' }) %>
+    <main class="hero" aria-label="בחירת פרופיל">
+      <h1 id="greeting">שלום <%= currentUser?.username || '' %>!</h1>
+      <% if (message) { %>
+        <div class="alert alert-success mt-3"><%= message %></div>
+      <% } %>
+      <% if (error) { %>
+        <div class="alert alert-danger mt-3"><%= error %></div>
+      <% } %>
+
+      <div id="profilesContainer" class="scroller profiles">
+        <div>טוען פרופילים...</div>
+      </div>
+
+      <p class="info text-center mt-3">ניתן ליצור עד 5 פרופילים לכל משתמש</p>
+    </main>
+
+    <script>
+      async function readJsonIfPossible(res) {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.toLowerCase().includes('application/json')) {
+          try {
+            return await res.json();
+          } catch (err) {
+            return null;
+          }
+        }
+        return null;
+      }
+
+      async function fetchProfiles() {
+        try {
+          const res = await fetch('/profiles/api', { headers: { 'Accept': 'application/json' } });
+          if (!res.ok) throw new Error('לא ניתן לקבל פרופילים');
+          const profiles = await res.json();
+          renderProfiles(profiles || []);
+        } catch (err) {
+          document.getElementById('profilesContainer').innerHTML = '<div class="text-danger">שגיאה בטעינת פרופילים</div>';
+        }
+      }
+
+      function renderProfiles(profiles) {
+        const container = document.getElementById('profilesContainer');
+        container.innerHTML = '';
+        profiles.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'card profile text-center';
+          card.innerHTML = `
+            <div style="font-weight:800; font-size:20px; margin-bottom:12px;">${escapeHtml(p.name || '')}</div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
+              <button class="btn btn-primary" data-id="${p._id}" onclick="selectProfile('${p._id}')">היכנסו</button>
+              <button class="btn btn-outline-danger btn-sm" onclick="deleteProfile('${p._id}')">מחק פרופיל</button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+        if (!profiles || profiles.length < 5) {
+          const add = document.createElement('div');
+          add.className = 'card profile text-center';
+          add.innerHTML = `
+            <div class="plus">+</div>
+            <div style="margin-top:8px;font-weight:700;">הוספת פרופיל</div>
+            <input id="newProfileName" class="form-control mt-2" placeholder="שם הפרופיל" style="max-width:160px;margin:0 auto;" />
+            <button class="btn btn-success mt-2" onclick="createProfile()">יצירה</button>
+          `;
+          container.appendChild(add);
+        }
+      }
+
+      function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+      function selectProfile(id){
+        window.location.href = '/profiles/select/' + encodeURIComponent(id);
+      }
+
+      async function deleteProfile(id){
+        if (!confirm('להסיר פרופיל זה?')) return;
+        const res = await fetch('/profiles/delete/' + encodeURIComponent(id), {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          await readJsonIfPossible(res);
+          await fetchProfiles();
+        } else {
+          const data = await readJsonIfPossible(res);
+          let message = 'שגיאה במחיקת פרופיל';
+          if (data && data.error) {
+            message = data.error;
+          }
+          alert(message);
+        }
+      }
+
+      async function createProfile(){
+        const name = document.getElementById('newProfileName').value.trim();
+        if (!name) { alert('הזן שם לפרופיל'); return; }
+        const res = await fetch('/profiles', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ name })
+        });
+        if (res.ok) {
+          await readJsonIfPossible(res);
+          document.getElementById('newProfileName').value = '';
+          await fetchProfiles();
+        } else {
+          const data = await readJsonIfPossible(res);
+          let message = 'שגיאה ביצירת פרופיל';
+          if (data && data.error) {
+            message = data.error;
+          }
+          alert(message);
+        }
+      }
+
+      fetchProfiles();
+    </script>
+  </body>
+</html>

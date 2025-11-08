@@ -1,59 +1,74 @@
-// Render login page
-import path from "path";
 import User from "../models/User.js";
 
 export const loginGet = (req, res) => {
-  // serve static login page
-  return res.sendFile(path.join(process.cwd(), "public", "login.html"));
+  const error = req.query.error ? req.query.error : null;
+  res.render("auth/login", { error });
 };
 
-// Handle login POST
 export const loginPost = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.redirect('/login?error=' + encodeURIComponent('יש למלא את כל השדות'));
+  const username = req.body.username || "";
+  const password = req.body.password || "";
+
+  if (!username || !password) {
+    return res.redirect("/login?error=" + encodeURIComponent("יש למלא את כל השדות"));
   }
-  const user = await User.findOne({ email });
-  if (!user || !(await user.verifyPassword(password))) {
-    return res.redirect('/login?error=' + encodeURIComponent('אימייל או סיסמה שגויים'));
+
+  const user = await User.findOne({ username });
+  if (!user) {
+    return res.redirect("/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים"));
   }
-  req.session.user = { id: user._id, email: user.email, isAdmin: user.isAdmin };
-  res.redirect('/profiles');
+
+  const isValid = await user.verifyPassword(password);
+  if (!isValid) {
+    return res.redirect("/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים"));
+  }
+
+  req.session.user = {
+    id: user._id,
+    username: user.username,
+    isAdmin: user.isAdmin,
+  };
+  res.redirect("/profiles");
 };
 
-// Render register page
 export const registerGet = (req, res) => {
-  return res.sendFile(path.join(process.cwd(), "public", "register.html"));
+  const error = req.query.error ? req.query.error : null;
+  res.render("auth/register", { error });
 };
 
-// Logout
-export const logout = (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/login');
-  });
-};
 export const registerPost = async (req, res) => {
-  const { email, password, confirmPassword } = req.body;
+  const username = (req.body.username || "").trim();
+  const password = req.body.password || "";
+  const confirmPassword = req.body.confirmPassword || "";
 
-  console.log("REGISTER BODY:", req.body); // לבדיקה – תראה בטרמינל
-
-  if (!email || !password || !confirmPassword) {
-    return res.redirect('/register?error=' + encodeURIComponent('יש למלא את כל השדות'));
+  if (!username || !password || !confirmPassword) {
+    return res.redirect("/register?error=" + encodeURIComponent("יש למלא את כל השדות"));
   }
 
   if (password !== confirmPassword) {
-    return res.redirect('/register?error=' + encodeURIComponent('הסיסמאות אינן תואמות'));
+    return res.redirect("/register?error=" + encodeURIComponent("הסיסמאות אינן תואמות"));
   }
 
-  if (await User.findOne({ email })) {
-    return res.redirect('/register?error=' + encodeURIComponent('משתמש כבר קיים'));
+  const existing = await User.findOne({ username });
+  if (existing) {
+    return res.redirect("/register?error=" + encodeURIComponent("משתמש כבר קיים"));
   }
 
-  const u = new User({ email });
-  await u.setPassword(password);
-  u.profiles.push({ name: "אני" });
-  await u.save();
+  const user = new User({ username });
+  await user.setPassword(password);
+  user.profiles.push({ name: "אני" });
+  await user.save();
 
-  req.session.user = { id: u._id, email: u.email, isAdmin: u.isAdmin };
+  req.session.user = {
+    id: user._id,
+    username: user.username,
+    isAdmin: user.isAdmin,
+  };
   res.redirect("/profiles");
+};
+
+export const logout = (req, res) => {
+  req.session.destroy(() => {
+    res.redirect("/login");
+  });
 };

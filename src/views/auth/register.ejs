@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>הרשמה - BurekaFlix</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      body { background: #eef2fb; }
+      .hero { max-width:480px; margin:5vh auto; background:#fff; padding:2.2rem; border-radius:12px; box-shadow:0 8px 32px rgba(10,30,70,0.08); }
+      .project-title { font-weight:800; color:#0b4b8a; margin-bottom:0.5rem; }
+      .screen-title { color:#1976d2; margin-bottom:1.2rem }
+    </style>
+  </head>
+  <body>
+    <main class="hero" aria-label="מסך הרשמה">
+      <h1 class="project-title">BurekaFlix</h1>
+      <h2 class="screen-title">הרשמה</h2>
+
+      <% if (error) { %>
+        <div class="alert alert-danger" role="alert"><%= error %></div>
+      <% } %>
+
+      <form id="registerForm" action="/register" method="post" autocomplete="on">
+        <div class="mb-3">
+          <input class="form-control" type="text" name="username" placeholder="שם משתמש" autocomplete="username" required />
+        </div>
+        <div class="mb-3">
+          <input class="form-control" type="password" name="password" placeholder="סיסמה" autocomplete="new-password" required />
+        </div>
+        <div class="mb-3">
+          <input class="form-control" type="password" name="confirmPassword" placeholder="אימות סיסמה" autocomplete="new-password" required />
+        </div>
+        <div class="d-grid">
+          <button class="btn btn-success" type="submit">צור משתמש</button>
+        </div>
+      </form>
+
+      <p class="mt-3">כבר יש לכם משתמש? <a href="/login">כניסה</a></p>
+    </main>
+  </body>
+</html>

@@ -14,50 +14,74 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const FALLBACK_MONGO_URI =
+  "mongodb+srv://admin_burekaflix:admin@burekaflix.c97tbrj.mongodb.net/burekaflix";
 const MONGO_URI =
-  process.env.MONGO_URI ;
+  process.env.MONGO_URI ||
+  process.env.MONGODB_URI ||
+  process.env.MONGO_URL ||
+  FALLBACK_MONGO_URI;
+
+if (!process.env.MONGO_URI && !process.env.MONGODB_URI && !process.env.MONGO_URL) {
+  console.warn(
+    "Mongo env vars not set. Using the default connection string from .env.example.",
+  );
+}
+
+const SESSION_SECRET = process.env.SESSION_SECRET || "change_if_needed";
+
+if (!process.env.SESSION_SECRET) {
+  console.warn(
+    "SESSION_SECRET not set. Using the default fallback value; update your .env for production.",
+  );
+}
 
 mongoose.connect(MONGO_URI);
 
 // Add a log to confirm MongoDB connection success
-mongoose.connection.on('connected', () => {
-  console.log('MongoDB connected successfully.');
+mongoose.connection.on("connected", () => {
+  console.log("MongoDB connected successfully.");
 });
 
 // Log the name of the connected database
-mongoose.connection.on('connected', async () => {
+mongoose.connection.on("connected", async () => {
   try {
     const dbName = mongoose.connection.db.databaseName;
     console.log(`Connected to MongoDB database: ${dbName}`);
   } catch (error) {
-    console.error('Failed to retrieve database name:', error);
+    console.error("Failed to retrieve database name:", error);
   }
 });
 
 // Log all collections in the connected database
-mongoose.connection.on('connected', async () => {
+mongoose.connection.on("connected", async () => {
   try {
-    const collections = await mongoose.connection.db.listCollections().toArray();
-    console.log('Collections in the database:');
+    const collections = await mongoose.connection.db
+      .listCollections()
+      .toArray();
+    console.log("Collections in the database:");
     collections.forEach((collection) => console.log(`- ${collection.name}`));
   } catch (error) {
-    console.error('Failed to list collections:', error);
+    console.error("Failed to list collections:", error);
   }
 });
 
-mongoose.connection.on('error', (err) => {
-  console.error('MongoDB connection error:', err);
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB connection error:", err);
 });
 
-// Views removed: serving static HTML from public/
+app.set("views", path.join(__dirname, "src", "views"));
+app.set("view engine", "ejs");
+app.locals.basedir = app.get("views");
 
 app.use(
   session({
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: MONGO_URI }),
     cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
-  })
+  }),
 );
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
@@ -66,7 +90,9 @@ app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // serve repository root logo file (user added `logo.png` at project root)
-app.get('/logo.png', (req, res) => res.sendFile(path.join(__dirname, 'logo.png')));
+app.get("/logo.png", (req, res) =>
+  res.sendFile(path.join(__dirname, "logo.png")),
+);
 
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
@@ -89,25 +115,27 @@ app.use("/admin", admin);
 app.use("/api", api);
 
 app.get("/", (req, res) =>
-  !req.session.user ? res.redirect("/login") : res.redirect("/catalog")
+  !req.session.user ? res.redirect("/login") : res.redirect("/catalog"),
 );
 
 // Add a MongoDB connection test route
-app.get('/test-mongo', async (req, res) => {
+app.get("/test-mongo", async (req, res) => {
   try {
     await mongoose.connection.db.admin().ping();
-    res.status(200).send('MongoDB connection is working correctly.');
+    res.status(200).send("MongoDB connection is working correctly.");
   } catch (error) {
-    console.error('MongoDB connection test failed:', error);
-    res.status(500).send('MongoDB connection test failed. Check server logs for details.');
+    console.error("MongoDB connection test failed:", error);
+    res
+      .status(500)
+      .send("MongoDB connection test failed. Check server logs for details.");
   }
 });
 
-app.use((req, res) => res.status(404).sendFile(path.join(__dirname, 'public', 'errors', '404.html')));
+app.use((req, res) => res.status(404).render("errors/404"));
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).sendFile(path.join(__dirname, 'public', 'errors', '500.html'));
+  res.status(500).render("errors/500");
 });
 
 const PORT = process.env.PORT || 3000;

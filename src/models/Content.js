@@ -12,6 +12,6 @@ const ContentSchema = new mongoose.Schema(
     rating: Number,
     wikipedia: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 export default mongoose.model("Content", ContentSchema);

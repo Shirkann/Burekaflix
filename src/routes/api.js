@@ -12,14 +12,12 @@ import {
 
 const r = Router();
 
-// Catalog APIs (require auth)
 r.get("/catalog", auth, catalogList);
 r.get("/genre/:genre", auth, genreList);
 r.get("/popular", auth, popular);
 r.get("/newest-by-genre", auth, newestByGenre);
 r.get("/content/:id", auth, contentDetails);
 
-// Profiles-related APIs
 r.get("/profiles/history", auth, profile, profilesHistory);
 r.get("/profiles/recommendations", auth, profile, profilesRecommendations);
 

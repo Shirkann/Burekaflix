@@ -14,8 +14,12 @@ export const genreList = async (req, res) => {
 };
 
 export const popular = async (req, res) => {
-  const movies = await Content.find({ type: "movie" }).sort({ popularity: -1 }).limit(12);
-  const series = await Content.find({ type: "series" }).sort({ popularity: -1 }).limit(12);
+  const movies = await Content.find({ type: "movie" })
+    .sort({ popularity: -1 })
+    .limit(12);
+  const series = await Content.find({ type: "series" })
+    .sort({ popularity: -1 })
+    .limit(12);
   res.json({ movies, series });
 };
 
@@ -23,20 +27,24 @@ export const newestByGenre = async (req, res) => {
   const genres = await Content.distinct("genres");
   const out = {};
   for (const g of genres) {
-    out[g] = await Content.find({ genres: g }).sort({ createdAt: -1 }).limit(10);
+    out[g] = await Content.find({ genres: g })
+      .sort({ createdAt: -1 })
+      .limit(10);
   }
   res.json(out);
 };
 
 export const profilesHistory = async (req, res) => {
-  if (!req.session.user || !req.session.profile) return res.status(200).json([]);
+  if (!req.session.user || !req.session.profile)
+    return res.status(200).json([]);
   const u = await User.findById(req.session.user.id).populate("profiles.liked");
   const p = u.profiles.find((p) => String(p._id) === req.session.profile);
   res.json(p?.liked || []);
 };
 
 export const profilesRecommendations = async (req, res) => {
-  if (!req.session.user || !req.session.profile) return res.status(200).json([]);
+  if (!req.session.user || !req.session.profile)
+    return res.status(200).json([]);
   const u = await User.findById(req.session.user.id).populate("profiles.liked");
   const p = u.profiles.find((p) => String(p._id) === req.session.profile);
   const liked = p?.liked || [];
@@ -56,7 +64,6 @@ export const profilesRecommendations = async (req, res) => {
 
 export const contentDetails = async (req, res) => {
   const c = await Content.findById(req.params.id);
-  console.log("Fetched content details:", c); // Debugging
-  if (!c) return res.status(404).json({ error: 'not found' });
+  if (!c) return res.status(404).json({ error: "not found" });
   res.json(c);
 };

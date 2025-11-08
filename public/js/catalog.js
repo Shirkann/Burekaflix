@@ -4,9 +4,13 @@ import { fetchMovieDetails } from "./movieDetails.js";
 
 console.log("Catalog.js loaded successfully");
 
+const getInitialGenre = () => document.body?.dataset?.initialGenre || "";
+
 const fetchMovies = async () => {
   try {
-    const response = await fetch("/api/movies");
+    const response = await fetch("/api/movies", {
+      headers: { Accept: "application/json" },
+    });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -25,7 +29,7 @@ const fetchMovies = async () => {
             <h5>${movie.title}</h5>
             <p>${movie.summary || "No description available."}</p>
           </div>
-        </div>`
+        </div>`,
         )
         .join("");
     }
@@ -35,6 +39,11 @@ const fetchMovies = async () => {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+  const genreFilter = document.getElementById("genreFilter");
+  const initial = getInitialGenre();
+  if (genreFilter && initial) {
+    genreFilter.value = initial;
+  }
   fetchMovies();
 
   // Add click event listener to movie cards
