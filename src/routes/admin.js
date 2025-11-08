@@ -14,30 +14,9 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// const sanitizeFilename = (name) =>
-//   name
-//     .trim()
-//     .replace(/\s+/g, "_")
-//     .replace(/[^a-zA-Z0-9._-]/g, "");
-
-const buildSafeFilename = (file) => {
-  const fallbackName = "video";
-  const rawOriginal = (file.originalname || "").trim() || `${fallbackName}.mp4`;
-  const ext = path.extname(rawOriginal) || ".mp4";
-  // const base = sanitizeFilename(path.basename(rawOriginal, ext)) || fallbackName;
-
-  let candidate = `${fallbackName}${ext}`;
-  let counter = 1;
-  while (fs.existsSync(path.join(uploadsDir, candidate))) {
-    candidate = `${fallbackName}-${counter}${ext}`;
-    counter += 1;
-  }
-  return candidate;
-};
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => cb(null, buildSafeFilename(file)),
+  filename: (req, file, cb) => cb(null, file.originalname),
 });
 
 const upload = multer({
