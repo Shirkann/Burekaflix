@@ -21,7 +21,7 @@
       <% if (error) { %>
         <div class="alert alert-danger" role="alert"><%= error %></div>
       <% } %>
-      <form id="addForm" method="post" action="/admin/add">
+      <form id="addForm" method="post" action="/admin/add" enctype="multipart/form-data">
         <div class="mb-2"><input class="form-control" name="title" placeholder="שם" required></div>
         <div class="mb-2">
           <select name="type" class="form-select">
@@ -32,8 +32,15 @@
         <div class="mb-2"><input class="form-control" name="year" type="number" placeholder="שנה"></div>
         <div class="mb-2"><input class="form-control" name="genres" placeholder="ז׳אנרים (פסיקים)"></div>
         <div class="mb-2"><textarea class="form-control" name="summary" rows="3" placeholder="תיאור"></textarea></div>
+        <div class="mb-2"><input class="form-control" name="stagemanager" placeholder="במאי / יוצר"></div>
+        <div class="mb-2"><input class="form-control" name="players" placeholder="שחקנים (מופרדים בפסיקים)"></div>
         <div class="mb-2"><input class="form-control" name="posterUrl" placeholder="Poster URL"></div>
-        <div class="mb-2"><input class="form-control" name="videoUrl" placeholder="Trailer URL"></div>
+        <div class="mb-2">
+          <label class="form-label" for="videoFile">קובץ וידאו (MP4)</label>
+          <input class="form-control" id="videoFile" name="videoFile" type="file" accept="video/mp4" required>
+          <div class="form-text">הקובץ יישמר בתיקיית public/video והשם יתווסף למסד הנתונים.</div>
+        </div>
+        <div class="mb-2"><input class="form-control" name="episodes" placeholder="שמות פרקים (movie1.mp4, movie2.mp4)"></div>
         <div class="mb-2"><input class="form-control" name="wikipedia" placeholder="ויקיפדיה"></div>
         <div class="d-grid"><button class="btn btn-primary">הוספה</button></div>
       </form>
