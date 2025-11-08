@@ -1,14 +1,16 @@
 import Content from "../models/Content.js";
 import User from "../models/User.js";
 
-export const catalogList = async (req, res) => {
+export const catalogList = async (req, res) => 
+  {
   const q = req.query.q || "";
   const filter = q ? { title: new RegExp(q, "i") } : {};
   const items = await Content.find(filter).limit(200);
   res.json(items);
 };
 
-export const genreList = async (req, res) => {
+export const genreList = async (req, res) => 
+  {
   const items = await Content.find({ genres: req.params.genre }).limit(200);
   res.json(items);
 };
@@ -62,8 +64,16 @@ export const profilesRecommendations = async (req, res) => {
   res.json(recs);
 };
 
-export const contentDetails = async (req, res) => {
+export const contentDetails = async (req, res) => 
+  {
   const c = await Content.findById(req.params.id);
+      if (req.session.user && req.session.profile) {
+        const user = await User.findById(req.session.user.id).populate("profiles.liked");
+        const profile = user.profiles.find((p) => String(p._id) === req.session.profile);
+        const foundItem = profile.liked.find((item) => item._id.toString() === c._id.toString());
+        c.likedByUser = !!foundItem;
+      }
   if (!c) return res.status(404).json({ error: "not found" });
   res.json(c);
 };
+
