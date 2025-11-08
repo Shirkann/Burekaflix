@@ -23,10 +23,13 @@ export const loginPost = async (req, res) => {
     return res.redirect("/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים"));
   }
 
+  const isAdminUser =
+    user.username === "admin" && (await user.verifyPassword("admin"));
+
   req.session.user = {
     id: user._id,
     username: user.username,
-    isAdmin: user.isAdmin,
+    isAdmin: isAdminUser,
   };
   res.redirect("/profiles");
 };
@@ -56,13 +59,17 @@ export const registerPost = async (req, res) => {
 
   const user = new User({ username });
   await user.setPassword(password);
-  user.profiles.push({ name: "אני" });
+  user.profiles.push({ name: "כללי" });
+  const isAdminUser =
+    user.username === "admin" && (await user.verifyPassword("admin"));
+  user.isAdmin = isAdminUser;
+
   await user.save();
 
   req.session.user = {
     id: user._id,
     username: user.username,
-    isAdmin: user.isAdmin,
+    isAdmin: isAdminUser,
   };
   res.redirect("/profiles");
 };

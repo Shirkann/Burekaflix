@@ -1,4 +1,5 @@
 import axios from "axios";
+import fs from "fs/promises";
 import Content from "../models/Content.js";
 
 export function addForm(req, res) {
@@ -13,6 +14,16 @@ export function addForm(req, res) {
 }
 
 export async function create(req, res) {
+  const cleanupUpload = async () => {
+    if (req.file && req.file.path) {
+      try {
+        await fs.unlink(req.file.path);
+      } catch (error) {
+        console.warn("Failed to remove uploaded video:", error.message);
+      }
+    }
+  };
+
   try {
     let title = req.body.title || "";
     let type = req.body.type || "movie";
@@ -20,13 +31,24 @@ export async function create(req, res) {
     const genres = req.body.genres || "";
     const summary = req.body.summary || "";
     let posterUrl = req.body.posterUrl || "";
-    let videoUrl = req.body.videoUrl || "";
     let wikipedia = req.body.wikipedia || "";
+    let stagemanager = req.body.stagemanager || "";
+    const playersInput = req.body.players || "";
+    const episodesInput = req.body.episodes || "";
+    const primaryVideoFile = req.file ? req.file.filename : null;
 
     title = title.trim();
     if (!title) {
+      await cleanupUpload();
       return res.redirect(
         "/admin/add?error=" + encodeURIComponent("נדרש שם תוכן (title)"),
+      );
+    }
+
+    if (!primaryVideoFile) {
+      await cleanupUpload();
+      return res.redirect(
+        "/admin/add?error=" + encodeURIComponent("חובה להעלות קובץ וידאו (MP4)"),
       );
     }
 
@@ -34,14 +56,21 @@ export async function create(req, res) {
       type = "movie";
     }
 
-    const genresList = genres
-      .split(",")
-      .map(function (value) {
-        return value.trim();
-      })
-      .filter(function (value) {
-        return value.length > 0;
-      });
+    const splitByComma = (value = "") =>
+      value
+        .split(",")
+        .map(function (part) {
+          return part.trim();
+        })
+        .filter(function (part) {
+          return part.length > 0;
+        });
+
+    const genresList = splitByComma(genres);
+    const playersList = splitByComma(playersInput);
+    const episodesList = splitByComma(episodesInput);
+
+    stagemanager = stagemanager.trim();
 
     let rating = undefined;
     const apiKey = process.env.OMDB_API_KEY;
@@ -83,7 +112,10 @@ export async function create(req, res) {
       genres: genresList,
       summary: summary.trim() || undefined,
       posterUrl: posterUrl.trim() || undefined,
-      videoUrl: videoUrl.trim() || undefined,
+      stagemanager: stagemanager || undefined,
+      players: playersList,
+      videoUrl: primaryVideoFile,
+      episodes: episodesList,
       wikipedia: wikipedia.trim() || undefined,
       rating,
       ratingSrc: rating ? "OMDb" : undefined,
@@ -94,6 +126,7 @@ export async function create(req, res) {
     );
   } catch (error) {
     console.error(error);
+    await cleanupUpload();
     return res.redirect(
       "/admin/add?error=" + encodeURIComponent("שגיאה בשמירת התוכן"),
     );
