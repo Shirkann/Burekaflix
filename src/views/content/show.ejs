@@ -58,6 +58,7 @@
         const genres = Array.isArray(c.genres) ? c.genres.join(", ") : "";
         const players = Array.isArray(c.players) ? c.players.join(", ") : "";
         const poster = c.posterUrl || "https://via.placeholder.com/320x460?text=Poster";
+        const stagemanager = c.stagemanager;
 
         return `
           <div class="row g-4 align-items-start">
@@ -90,6 +91,13 @@
                   )
                   .join(", ")}
               </p>
+
+              <p class="muted mb-3">
+                <strong>במאי:</strong>
+                ${stagemanager}
+              </p>
+
+
               <p class="mb-4">${escapeHtml(c.summary || "")}</p>
 
               <div class="d-flex gap-2">
