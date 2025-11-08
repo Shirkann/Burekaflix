@@ -4,6 +4,8 @@ const ContentSchema = new mongoose.Schema(
     title: { type: String, required: true, index: true },
     type: { type: String, enum: ["movie", "series"], required: true },
     year: Number,
+    stagemanager: String,
+    players: [String],
     genres: [String],
     summary: String,
     posterUrl: String,

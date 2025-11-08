@@ -56,6 +56,7 @@
 
       function renderContent(c) {
         const genres = Array.isArray(c.genres) ? c.genres.join(", ") : "";
+        const players = Array.isArray(c.players) ? c.players.join(", ") : "";
         const poster = c.posterUrl || "https://via.placeholder.com/320x460?text=Poster";
 
         return `
@@ -74,6 +75,20 @@
                 ${escapeHtml(c.year ?? "")}${c.year && genres ? " • " : ""}${escapeHtml(
           genres,
         )}
+              </p>
+              <p class="muted mb-3">
+                <strong>שחקנים:</strong>
+                ${players
+                  .split(", ")
+                  .map(
+                    (player) =>
+                      `<a href="https://he.wikipedia.org/wiki/${encodeURIComponent(
+                        player
+                      )}" target="_blank" rel="noopener noreferrer">${escapeHtml(
+                        player
+                      )}</a>`
+                  )
+                  .join(", ")}
               </p>
               <p class="mb-4">${escapeHtml(c.summary || "")}</p>
 
