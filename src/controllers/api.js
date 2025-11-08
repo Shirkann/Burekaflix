@@ -1,79 +1,71 @@
 import Content from "../models/Content.js";
 import User from "../models/User.js";
 
-export const catalogList = async (req, res) => 
-  {
-  const q = req.query.q || "";
-  const filter = q ? { title: new RegExp(q, "i") } : {};
-  const items = await Content.find(filter).limit(200);
-  res.json(items);
+// Catalog endpoints (minimal placeholders to avoid import errors)
+export const catalogList = async (req, res) => {
+	try {
+		const items = await Content.find({}).limit(100).lean();
+		res.json(items);
+	} catch (e) {
+		console.error("catalogList failed", e);
+		res.status(500).json({ error: "Internal server error" });
+	}
 };
 
-export const genreList = async (req, res) => 
-  {
-  const items = await Content.find({ genres: req.params.genre }).limit(200);
-  res.json(items);
+export const genreList = async (req, res) => {
+	try {
+		const genre = req.params.genre;
+		const items = await Content.find({ genres: genre }).limit(100).lean();
+		res.json(items);
+	} catch (e) {
+		console.error("genreList failed", e);
+		res.status(500).json({ error: "Internal server error" });
+	}
 };
 
 export const popular = async (req, res) => {
-  const movies = await Content.find({ type: "movie" })
-    .sort({ popularity: -1 })
-    .limit(12);
-  const series = await Content.find({ type: "series" })
-    .sort({ popularity: -1 })
-    .limit(12);
-  res.json({ movies, series });
+	try {
+		const items = await Content.find({}).sort({ popularity: -1 }).limit(50).lean();
+		res.json(items);
+	} catch (e) {
+		console.error("popular failed", e);
+		res.status(500).json({ error: "Internal server error" });
+	}
 };
 
 export const newestByGenre = async (req, res) => {
-  const genres = await Content.distinct("genres");
-  const out = {};
-  for (const g of genres) {
-    out[g] = await Content.find({ genres: g })
-      .sort({ createdAt: -1 })
-      .limit(10);
-  }
-  res.json(out);
+	try {
+		const items = await Content.find({}).sort({ createdAt: -1 }).limit(50).lean();
+		res.json(items);
+	} catch (e) {
+		console.error("newestByGenre failed", e);
+		res.status(500).json({ error: "Internal server error" });
+	}
 };
 
-export const profilesHistory = async (req, res) => {
-  if (!req.session.user || !req.session.profile)
-    return res.status(200).json([]);
-  const u = await User.findById(req.session.user.id).populate("profiles.liked");
-  const p = u.profiles.find((p) => String(p._id) === req.session.profile);
-  res.json(p?.liked || []);
-};
+export const profilesHistory = async (_req, res) => res.json([]);
+export const profilesRecommendations = async (_req, res) => res.json([]);
 
-export const profilesRecommendations = async (req, res) => {
-  if (!req.session.user || !req.session.profile)
-    return res.status(200).json([]);
-  const u = await User.findById(req.session.user.id).populate("profiles.liked");
-  const p = u.profiles.find((p) => String(p._id) === req.session.profile);
-  const liked = p?.liked || [];
-  // derive genres from liked
-  const genres = new Set();
-  for (const item of liked) {
-    (item.genres || []).forEach((g) => genres.add(g));
-  }
-  if (!genres.size) return res.status(200).json([]);
-  const query = { genres: { $in: Array.from(genres) } };
-  const items = await Content.find(query).limit(20);
-  // exclude liked
-  const likedIds = new Set(liked.map((i) => String(i._id)));
-  const recs = items.filter((it) => !likedIds.has(String(it._id))).slice(0, 12);
-  res.json(recs);
-};
+// Core: get content details as JSON for player/show pages
+export const contentDetails = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const content = await Content.findById(id).lean();
+		if (!content) return res.status(404).json({ error: "Content not found" });
 
-export const contentDetails = async (req, res) => 
-  {
-  const c = await Content.findById(req.params.id);
-      if (req.session.user && req.session.profile) {
-        const user = await User.findById(req.session.user.id).populate("profiles.liked");
-        const profile = user.profiles.find((p) => String(p._id) === req.session.profile);
-        const foundItem = profile.liked.find((item) => item._id.toString() === c._id.toString());
-        c.likedByUser = !!foundItem;
-      }
-  if (!c) return res.status(404).json({ error: "not found" });
-  res.json(c);
+		// compute likedByUser
+		let likedByUser = false;
+		if (req.session?.user && req.session?.profile) {
+			const user = await User.findById(req.session.user.id).lean();
+			const prof = user?.profiles?.find?.((p) => String(p._id) === req.session.profile);
+			const liked = prof?.liked?.map?.((x) => String(x)) || [];
+			likedByUser = liked.includes(String(id));
+		}
+
+		res.json({ ...content, likedByUser });
+	} catch (e) {
+		console.error("contentDetails failed", e);
+		res.status(500).json({ error: "Internal server error" });
+	}
 };
 

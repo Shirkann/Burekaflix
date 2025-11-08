@@ -10,6 +10,8 @@ const ContentSchema = new mongoose.Schema(
     summary: String,
     posterUrl: String,
     videoUrl: String,
+  // For series: ordered list of episode video file names found under /public/videos
+  episodes: [String],
     popularity: { type: Number, default: 0 },
     rating: Number,
     wikipedia: String,

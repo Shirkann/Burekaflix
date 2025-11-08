@@ -9,6 +9,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/main.css" />
+    <!-- נגן המשולב הוסר. שימוש בדף player.ejs -->
   </head>
   <body>
     <%- include("../partial/header", { activePage: "catalog" }) %>
@@ -27,6 +28,8 @@
         </div>
       </section>
     </main>
+
+    <!-- נגן הוסר מהדף הזה -->
 
     <script>
       const $ = (sel) => document.querySelector(sel);
@@ -105,6 +108,9 @@
               <div class="d-flex gap-2">
                 <button id="likeBtn" class="btn ${liked ? "btn-success" : "btn-outline-primary"}" type="button" aria-label="${liked ? "הסר לייק" : "אהבתי"}">
                   ${liked ? "אהבת ❤" : "אהבתי"}
+                </button>
+                <button id="playBtn" class="btn btn-primary" type="button" aria-label="הפעל תוכן">
+                  הפעל ▶
                 </button>
               </div>
             </div>
@@ -190,6 +196,18 @@
               }
             });
           }
+
+          const playBtn = document.querySelector("#playBtn");
+          if (playBtn) {
+            playBtn.addEventListener("click", () => {
+              if (!c.videoUrl) {
+                alert("לא נמצא קובץ וידאו להפעלה.");
+                return;
+              }
+              const id = getContentIdFromPath();
+              window.location.href = "/content/" + encodeURIComponent(id) + "/player";
+            });
+          }
         } catch (err) {
           console.error(err);
           hide(loading);
@@ -200,6 +218,11 @@
       }
 
       load();
+
+
+
+      
+      // לוגיקת נגן הוסרה מהתבנית הזאת.
     </script>
 
   </body>

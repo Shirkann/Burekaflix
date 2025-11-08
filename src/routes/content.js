@@ -10,6 +10,11 @@ r.get("/:id", profile, (req, res) => {
   res.render("content/show");
 });
 
+// דף נגן
+r.get("/:id/player", profile, (req, res) => {
+  res.render("content/player");
+});
+
 // נתיב API לטעינת פרטי התוכן
 r.get("/api/:id", profile, details);
 
