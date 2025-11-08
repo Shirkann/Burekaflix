@@ -8,7 +8,7 @@ import { addForm, create } from "../controllers/admin.js";
 const router = Router();
 const currentFilePath = fileURLToPath(import.meta.url);
 const currentDirPath = path.dirname(currentFilePath);
-const uploadsDir = path.join(currentDirPath, "..", "..", "public", "video");
+const uploadsDir = path.join(currentDirPath, "..", "..", "public", "videos");
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });

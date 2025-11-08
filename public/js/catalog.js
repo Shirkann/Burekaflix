@@ -19,16 +19,31 @@ const fetchMovies = async () => {
     const catalogGrid = document.querySelector("#catalog-grid");
     if (catalogGrid) {
       catalogGrid.innerHTML = movies
-        .map(
-          (movie) => `
+        .map((movie) => {
+          const poster =
+            movie.posterUrl ||
+            "https://via.placeholder.com/320x460?text=Poster";
+          const rating =
+            typeof movie.imdb_rating === "number"
+              ? movie.imdb_rating.toFixed(1)
+              : typeof movie.rating === "number"
+              ? movie.rating.toFixed(1)
+              : null;
+
+          return `
         <div class="card" data-id="${movie._id}">
-          <img src="${movie.posterUrl}" alt="${movie.title}" />
+          <img src="${poster}" alt="${movie.title}" />
           <div class="info">
             <h5>${movie.title}</h5>
             <p>${movie.summary || "No description available."}</p>
+            ${
+              rating
+                ? `<p class="text-muted mb-0">דירוג IMDb: ${rating}/10</p>`
+                : ""
+            }
           </div>
-        </div>`,
-        )
+        </div>`;
+        })
         .join("");
     }
   } catch (error) {
