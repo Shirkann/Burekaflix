@@ -1,25 +1,27 @@
-import path from "path";
 import User from "../models/User.js";
 
+const redirectWithError = (res, path, message) =>
+  res.redirect(`${path}?error=${encodeURIComponent(message)}`);
+
 export const loginGet = (req, res) => {
-  return res.sendFile(path.join(process.cwd(), "public", "login.html"));
+  return res.render("auth/login", { error: req.query.error || null });
 };
 
 export const loginPost = async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
-    return res.redirect('/login?error=' + encodeURIComponent('יש למלא את כל השדות'));
+    return redirectWithError(res, "/login", "יש למלא את כל השדות");
   }
   const user = await User.findOne({ username });
   if (!user || !(await user.verifyPassword(password))) {
-    return res.redirect('/login?error=' + encodeURIComponent('שם משתמש או סיסמה שגויים'));
+    return redirectWithError(res, "/login", "שם משתמש או סיסמה שגויים");
   }
   req.session.user = { id: user._id, username: user.username, isAdmin: user.isAdmin };
   res.redirect('/profiles');
 };
 
 export const registerGet = (req, res) => {
-  return res.sendFile(path.join(process.cwd(), "public", "register.html"));
+  return res.render("auth/register", { error: req.query.error || null });
 };
 
 export const logout = (req, res) => {
@@ -30,18 +32,16 @@ export const logout = (req, res) => {
 export const registerPost = async (req, res) => {
   const { username, password, confirmPassword } = req.body;
 
-  console.log("REGISTER BODY:", req.body); // לבדיקה – תראה בטרמינל
-
   if (!username || !password || !confirmPassword) {
-    return res.redirect('/register?error=' + encodeURIComponent('יש למלא את כל השדות'));
+    return redirectWithError(res, "/register", "יש למלא את כל השדות");
   }
 
   if (password !== confirmPassword) {
-    return res.redirect('/register?error=' + encodeURIComponent('הסיסמאות אינן תואמות'));
+    return redirectWithError(res, "/register", "הסיסמאות אינן תואמות");
   }
 
   if (await User.findOne({ username })) {
-    return res.redirect('/register?error=' + encodeURIComponent('משתמש כבר קיים'));
+    return redirectWithError(res, "/register", "משתמש כבר קיים");
   }
 
   const u = new User({ username });

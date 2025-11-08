@@ -1,0 +1,30 @@
+<header class="header">
+  <div style="display: flex; align-items: center; gap: 1.2rem">
+    <img src="/logo.png" alt="BurekaFlix" class="logo" />
+    <span class="site-title">בורקפליקס</span>
+  </div>
+
+  <div class="right-buttons">
+    <button
+      class="<%= (activePage === 'catalog' ? 'selectedbutton' : 'headerbutton') %>"
+      onclick="location.href='/catalog'"
+    >
+      דף הבית
+    </button>
+    <% if (locals.currentUser?.isAdmin) { %>
+      <button
+        class="<%= (activePage === 'admin' ? 'selectedbutton' : 'headerbutton') %>"
+        onclick="location.href='/admin/add'"
+      >
+        אדמין
+      </button>
+    <% } %>
+  </div>
+
+  <div class="left-buttons">
+    <button class="headerbutton" onclick="location.href='/profiles'">החלף צופה</button>
+    <form method="post" action="/logout" style="display:inline; margin:0;">
+      <button class="headerbutton" type="submit">התנתקות</button>
+    </form>
+  </div>
+</header>

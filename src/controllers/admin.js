@@ -1,15 +1,11 @@
-// controllers/admin.js (ESM)
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import axios from 'axios';
 import Content from '../models/Content.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 export function addForm(req, res) {
-  const htmlPath = path.join(__dirname, '..', 'public', 'admin-add.html');
-  return res.sendFile(htmlPath);
+  return res.render('admin/add', {
+    message: req.query.message || (req.query.ok ? 'התוכן נשמר!' : null),
+    error: req.query.error || null,
+  });
 }
 
 export async function create(req, res) {
@@ -17,7 +13,9 @@ export async function create(req, res) {
     let { title, type, year, genres, summary, posterUrl, videoUrl, wikipedia } = req.body;
 
     if (!title?.trim()) {
-      return res.status(400).send('נדרש שם תוכן (title)');
+      const msg = 'נדרש שם תוכן (title)';
+      if (req.prefersJson) return res.status(400).json({ error: msg });
+      return res.redirect('/admin/add?error=' + encodeURIComponent(msg));
     }
 
     if (!['movie', 'series'].includes(type)) type = 'movie';
@@ -66,13 +64,14 @@ export async function create(req, res) {
     });
 
     // החזרה גמישה: הפניה חזרה עם דגל הצלחה או JSON
-    if (req.headers.accept?.includes('application/json')) {
+    if (req.prefersJson) {
       return res.status(201).json({ ok: true, id: doc._id, title: doc.title });
     }
-    return res.redirect('/admin/add?ok=1');
+    return res.redirect('/admin/add?message=' + encodeURIComponent(`${doc.title} נשמר בהצלחה`));
 
   } catch (err) {
     console.error(err);
-    return res.status(500).send('שגיאה בשמירת התוכן');
+    if (req.prefersJson) return res.status(500).json({ error: 'שגיאה בשמירת התוכן' });
+    return res.redirect('/admin/add?error=' + encodeURIComponent('שגיאה בשמירת התוכן'));
   }
 }
