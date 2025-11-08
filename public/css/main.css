@@ -1,3 +1,6 @@
+/* Wider modal sizing */
+#movieDetailsModal .modal-dialog.movie-details-dialog { max-width: 1200px; }
+#movieDetailsModal .modal-body { padding-top: 0.5rem; }
 /* ========= בסיס ========= */
 
 /* ========= Fonts ========= */
@@ -64,7 +67,6 @@ body {
   height: 38px;
   width: 38px;
   border-radius: 8px;
-  background: #fff2;
 }
 
 .site-title {
@@ -91,14 +93,16 @@ button.headerbutton {
 }
 
 button.headerbutton:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.2) !important;
 }
 
 button.selectedbutton {
-  background: rgba(255, 255, 255, 0.2);
+  background: white;
+  color: #1976d2;
   border-radius: 6px;
   padding: 0.4rem 1.1rem;
   font-weight: bold;
+  border: none;
 }
 
 /* ========= Hero ========= */
@@ -140,11 +144,77 @@ button.selectedbutton {
   color: inherit;
 }
 
-.card img {
-  width: 100%;
-  height: 260px;
+.content-movieposter {
+  width: 15%;
+  padding: 5px;
   object-fit: cover;
+  border-radius: 8px;
 }
+
+.content-moviePlayer {
+  width: 100%;
+  max-height: 60vh;
+  background: #000;
+  border-radius: 8px;
+}
+
+/* ======== Custom Video Player ======== */
+.media-container { display: flex; gap: 16px; align-items: flex-start; }
+.video-player-wrapper { position: relative; flex: 1 1 auto; min-width: 0; }
+
+.controls-bar {
+  position: absolute;
+  left: 0; right: 0; bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 40%, rgba(0,0,0,.8) 100%);
+  color: #fff;
+}
+
+.vp-btn {
+  appearance: none;
+  border: none;
+  background: #ffffff22;
+  color: #fff;
+  border-radius: 6px;
+  padding: .35rem .6rem;
+  cursor: pointer;
+}
+.vp-btn:hover { background: #ffffff33; }
+
+.left-controls, .right-controls {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.seek-bar {
+  width: clamp(120px, 30vw, 420px);
+}
+
+.time-display { font-variant-numeric: tabular-nums; min-width: 48px; text-align: center; }
+
+.episodes-overlay {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: min(320px, 85%);
+  background: #111;
+  color: #fff;
+  border-left: 1px solid #222;
+  padding: .75rem;
+  overflow-y: auto;
+  box-shadow: -6px 0 16px rgba(0,0,0,.35);
+}
+.episodes-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;
+}
+.episodes-list { list-style: none; margin: 0; padding: 0; }
+.episodes-list li { padding: .5rem; border-bottom: 1px solid #222; cursor: pointer; }
+.episodes-list li:hover { background: #1b1b1b; }
+.close-overlay { background: transparent; color: #fff; border: none; cursor: pointer; font-size: 18px; }
 
 /* ========= Info ========= */
 .info {
@@ -206,8 +276,25 @@ body {
   color: #6c757d;
 }
 
+.btn-close {
+  color: #1A1A1A !important;
+  opacity: 1 !important;
+  filter: none !important;
+  margin-right: auto !important; 
+  margin-left: 0 !important; 
+}
+
+
+.content-title {
+  font-family: 'NotoSansHebrew'!important;
+  font-weight: 900;
+  font-size: 42px;
+  color: #1A1A1A !important;
+}
+
+
 .movies-title {
-  font-family: "NotoSansHebrew" !important;
+  font-family: 'NotoSansHebrew'!important;
   font-weight: 900;
   font-size: 30px;
   color: #1a1a1a !important;
@@ -247,60 +334,3 @@ body {
   box-shadow: 0 8px 22px rgba(255, 255, 255, 0.12);
 }
 
-/* Fixed and improved header styles */
-.header {
-  background: #1976d2;
-  color: #fff;
-  padding: 1.2rem 2vw;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.logo {
-  height: 38px;
-  width: 38px;
-  border-radius: 8px;
-  background: #fff2;
-}
-
-.site-title {
-  font-size: 2rem;
-  font-weight: 800;
-}
-
-.right-buttons,
-.left-buttons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-button.headerbutton {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 0.4rem 1.1rem;
-  border-radius: 6px;
-  transition: background 0.3s;
-}
-
-button.headerbutton:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-button.selectedbutton {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  padding: 0.4rem 1.1rem;
-  font-weight: bold;
-}

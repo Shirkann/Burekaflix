@@ -1,3 +1,5 @@
+import { fetchMovieDetails } from "./movieDetails.js";
+
 // catalog.js - Client-side logic for the catalog page
 
 console.log("Catalog.js loaded successfully");
@@ -21,7 +23,7 @@ const fetchMovies = async () => {
       catalogGrid.innerHTML = movies
         .map(
           (movie) => `
-        <div class="card">
+        <div class="card" data-id="${movie._id}">
           <img src="${movie.posterUrl}" alt="${movie.title}" />
           <div class="info">
             <h5>${movie.title}</h5>
@@ -43,4 +45,16 @@ document.addEventListener("DOMContentLoaded", () => {
     genreFilter.value = initial;
   }
   fetchMovies();
+
+  // Add click event listener to movie cards
+  const catalogGrid = document.querySelector("#catalog-grid");
+  if (catalogGrid) {
+    catalogGrid.addEventListener("click", (event) => {
+      const card = event.target.closest(".card");
+      if (card) {
+        const movieId = card.dataset.id; // Assuming each card has a data-id attribute
+        fetchMovieDetails(movieId);
+      }
+    });
+  }
 });

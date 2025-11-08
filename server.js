@@ -14,7 +14,27 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const MONGO_URI = process.env.MONGO_URI;
+const FALLBACK_MONGO_URI =
+  "mongodb+srv://admin_burekaflix:admin@burekaflix.c97tbrj.mongodb.net/burekaflix";
+const MONGO_URI =
+  process.env.MONGO_URI ||
+  process.env.MONGODB_URI ||
+  process.env.MONGO_URL ||
+  FALLBACK_MONGO_URI;
+
+if (!process.env.MONGO_URI && !process.env.MONGODB_URI && !process.env.MONGO_URL) {
+  console.warn(
+    "Mongo env vars not set. Using the default connection string from .env.example.",
+  );
+}
+
+const SESSION_SECRET = process.env.SESSION_SECRET || "change_if_needed";
+
+if (!process.env.SESSION_SECRET) {
+  console.warn(
+    "SESSION_SECRET not set. Using the default fallback value; update your .env for production.",
+  );
+}
 
 mongoose.connect(MONGO_URI);
 
@@ -56,7 +76,7 @@ app.locals.basedir = app.get("views");
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "dev",
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: MONGO_URI }),

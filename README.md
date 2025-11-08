@@ -23,12 +23,8 @@
 ```bash
 # התקנת תלויות
 npm install
-
-# יצירת קובץ .env על בסיס הדוגמה
-cp .env.sample .env   # (Windows: copy .env.sample .env)
-
-# ערוך את הערכים (MONGO_URI / SESSION_SECRET)
-# אם צריך להריץ סקריפט זריעה (seed)
+cp .env.sample .env   # Windows: copy .env.sample .env
+# עריכת .env אם צריך (MONGO_URI/SESSION_SECRET)
 npm run seed
 
 # הפעלת השרת
