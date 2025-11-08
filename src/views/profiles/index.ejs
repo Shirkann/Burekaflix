@@ -33,6 +33,18 @@
     </main>
 
     <script>
+      async function readJsonIfPossible(res) {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.toLowerCase().includes('application/json')) {
+          try {
+            return await res.json();
+          } catch (err) {
+            return null;
+          }
+        }
+        return null;
+      }
+
       async function fetchProfiles() {
         try {
           const res = await fetch('/profiles/api', { headers: { 'Accept': 'application/json' } });
@@ -86,10 +98,15 @@
           headers: { 'Accept': 'application/json' }
         });
         if (res.ok) {
-          await res.json();
-          fetchProfiles();
+          await readJsonIfPossible(res);
+          await fetchProfiles();
         } else {
-          alert('שגיאה במחיקת פרופיל');
+          const data = await readJsonIfPossible(res);
+          let message = 'שגיאה במחיקת פרופיל';
+          if (data && data.error) {
+            message = data.error;
+          }
+          alert(message);
         }
       }
 
@@ -105,10 +122,16 @@
           body: JSON.stringify({ name })
         });
         if (res.ok) {
-          await res.json();
-          fetchProfiles();
+          await readJsonIfPossible(res);
+          document.getElementById('newProfileName').value = '';
+          await fetchProfiles();
         } else {
-          alert('שגיאה ביצירת פרופיל');
+          const data = await readJsonIfPossible(res);
+          let message = 'שגיאה ביצירת פרופיל';
+          if (data && data.error) {
+            message = data.error;
+          }
+          alert(message);
         }
       }
 
