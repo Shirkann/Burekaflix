@@ -22,7 +22,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const response = await fetch("/api/movies");
+    const response = await fetch("/api/movies", {
+      headers: { Accept: "application/json" },
+    });
     if (response.ok) {
       const movies = await response.json();
       renderMovies(movies);

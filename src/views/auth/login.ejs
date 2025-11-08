@@ -17,7 +17,9 @@
       <h1 class="project-title">BurekaFlix</h1>
       <h2 class="screen-title">כניסה</h2>
 
-      <div id="errorContainer"></div>
+      <% if (error) { %>
+        <div class="alert alert-danger" role="alert"><%= error %></div>
+      <% } %>
 
       <form id="loginForm" action="/login" method="post" autocomplete="on">
         <div class="mb-3">
@@ -34,17 +36,5 @@
       <p class="mt-3">אין לכם משתמש? <a href="/register">הרשמה</a></p>
       <p class="text-muted small">באהבה לקולנוע הישראלי 🇮🇱</p>
     </main>
-
-    <script>
-      // show error passed as ?error=...
-      (function(){
-        const params = new URLSearchParams(window.location.search);
-        const err = params.get('error');
-        if (err) {
-          const c = document.getElementById('errorContainer');
-          c.innerHTML = `<div class="alert alert-danger" role="alert">${decodeURIComponent(err)}</div>`;
-        }
-      })();
-    </script>
   </body>
 </html>

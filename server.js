@@ -49,7 +49,14 @@ mongoose.connection.on('error', (err) => {
   console.error('MongoDB connection error:', err);
 });
 
-// Views removed: serving static HTML from public/
+app.set("views", path.join(__dirname, "src", "views"));
+app.set("view engine", "ejs");
+app.locals.basedir = app.get("views");
+
+const prefersJson = (req) =>
+  req.get("Accept")?.includes("application/json") ||
+  req.get("X-Requested-With") === "XMLHttpRequest" ||
+  req.is("application/json");
 
 app.use(
   session({
@@ -65,6 +72,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
+app.use((req, res, next) => {
+  req.prefersJson = Boolean(prefersJson(req));
+  res.locals.prefersJson = req.prefersJson;
+  next();
+});
 
 // serve repository root logo file (user added `logo.png` at project root)
 app.get('/logo.png', (req, res) => res.sendFile(path.join(__dirname, 'logo.png')));
@@ -104,11 +116,15 @@ app.get('/test-mongo', async (req, res) => {
   }
 });
 
-app.use((req, res) => res.status(404).sendFile(path.join(__dirname, 'public', 'errors', '404.html')));
+app.use((req, res) => {
+  if (req.prefersJson) return res.status(404).json({ error: "לא נמצא" });
+  return res.status(404).render("errors/404");
+});
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).sendFile(path.join(__dirname, 'public', 'errors', '500.html'));
+  if (req.prefersJson) return res.status(500).json({ error: "תקלה בשרת" });
+  res.status(500).render("errors/500");
 });
 
 const PORT = process.env.PORT || 3000;
