@@ -1,5 +1,3 @@
-import { fetchMovieDetails } from "./movieDetails.js";
-
 // catalog.js - Client-side logic for the catalog page
 
 console.log("Catalog.js loaded successfully");
@@ -53,7 +51,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = event.target.closest(".card");
       if (card) {
         const movieId = card.dataset.id; // Assuming each card has a data-id attribute
-        fetchMovieDetails(movieId);
+        console.log(`Movie ID clicked: ${movieId}`);
+        // Redirect to the movie details page
+        window.location.href = `/content/${movieId}`;
       }
     });
   }
