@@ -334,3 +334,8 @@ body {
   box-shadow: 0 8px 22px rgba(255, 255, 255, 0.12);
 }
 
+.btn-outline-primary {
+  background-color: transparent;
+  border: 2px solid #1976d2;
+  color: #1976d2;
+}

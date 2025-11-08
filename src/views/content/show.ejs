@@ -59,6 +59,8 @@
         const players = Array.isArray(c.players) ? c.players.join(", ") : "";
         const poster = c.posterUrl || "https://via.placeholder.com/320x460?text=Poster";
         const stagemanager = c.stagemanager;
+        const liked = c.likedByUser; 
+        console.log(c.likedByUser); 
 
         return `
           <div class="row g-4 align-items-start">
@@ -101,8 +103,8 @@
               <p class="mb-4">${escapeHtml(c.summary || "")}</p>
 
               <div class="d-flex gap-2">
-                <button id="likeBtn" class="btn btn-outline-primary" type="button" aria-label="אהבתי">
-                  אהבתי
+                <button id="likeBtn" class="btn ${liked ? "btn-success" : "btn-outline-primary"}" type="button" aria-label="${liked ? "הסר לייק" : "אהבתי"}">
+                  ${liked ? "אהבת ❤" : "אהבתי"}
                 </button>
               </div>
             </div>
@@ -152,20 +154,38 @@
             likeBtn.addEventListener("click", async () => {
               likeBtn.disabled = true;
               try {
-                const r = await fetch("/content/" + encodeURIComponent(id) + "/like", {
-                  method: "POST",
-                  headers: { Accept: "application/json" },
-                });
-                if (r.ok) {
-                  likeBtn.classList.remove("btn-outline-primary");
-                  likeBtn.classList.add("btn-success");
-                  likeBtn.textContent = "נשמר ✔";
-                } else {
+
+                c.likedByUser = !c.likedByUser;
+                console.log(liked);
+                likeBtn.classList.remove("btn-outline-primary", "btn-success");
+                likeBtn.classList.add(c.likedByUser ? "btn-success" : "btn-outline-primary");
+                likeBtn.textContent = c.likedByUser ? "אהבת ❤" : "אהבתי";
+
+                // Send the request to the server
+                const r = await fetch(
+                  "/content/" + encodeURIComponent(id) + (c.likedByUser ? "/like" : "/unlike"),
+                  {
+                    method: "POST",
+                    headers: { Accept: "application/json" },
+                  }
+                );
+
+                if (!r.ok) {
+                  // Revert the state if the request fails
+                  c.likedByUser = !c.likedByUser;
+                  likeBtn.classList.remove("btn-outline-primary", "btn-success");
+                  likeBtn.classList.add(c.likedByUser ? "btn-success" : "btn-outline-primary");
+                  likeBtn.textContent = c.likedByUser ? "אהבת ❤" : "אהבתי";
                   alert("שגיאה בשמירת הלייק");
                 }
               } catch (err) {
                 console.error("like request failed", err);
                 alert("שגיאה בשמירת הלייק");
+                // Revert the state in case of an error
+                c.likedByUser = !c.likedByUser;
+                likeBtn.classList.remove("btn-outline-primary", "btn-success");
+                likeBtn.classList.add(c.likedByUser ? "btn-success" : "btn-outline-primary");
+                likeBtn.textContent = c.likedByUser ? "אהבת ❤" : "אהבתי";
               } finally {
                 setTimeout(() => (likeBtn.disabled = false), 1500);
               }
@@ -182,5 +202,6 @@
 
       load();
     </script>
+
   </body>
 </html>

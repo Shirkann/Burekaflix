@@ -13,6 +13,7 @@ const ContentSchema = new mongoose.Schema(
     popularity: { type: Number, default: 0 },
     rating: Number,
     wikipedia: String,
+    likedByUser: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
