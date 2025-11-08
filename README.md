@@ -1,19 +1,19 @@
 # 🎬 BurekaFlix — Full Stack (Node + Express + MongoDB)
 
 פרויקט **בורקאפליקס** הוא מערכת צפייה וניהול תוכן בהשראת Netflix 🍿  
-נבנה במסגרת קורס *פיתוח אפליקציות אינטרנטיות*, ומשלב **Node.js**, **Express**, **MongoDB** ו-**EJS** עם תבניות Layout של `ejs-mate`.  
+נבנה במסגרת קורס _פיתוח אפליקציות אינטרנטיות_, ומשלב **Node.js**, **Express**, **MongoDB** ו-**EJS** עם תבניות Layout של `ejs-mate`.  
 המטרה: ליצור חוויה מלאה של אתר סטרימינג - עם ממשק משתמש כחול-לבן 🇮🇱, ניהול תוכן, משתמשים והרשאות.
 
 ---
 
 ## ⚙️ Tech Stack
 
-| Layer | Technologies |
-|:------|:--------------|
-| 💻 Backend | Node.js, Express.js |
-| 🧠 Database | MongoDB (Mongoose ODM) |
-| 🎨 Frontend | EJS + ejs-mate layouts |
-| 🔒 Auth | express-session, bcrypt |
+| Layer        | Technologies                           |
+| :----------- | :------------------------------------- |
+| 💻 Backend   | Node.js, Express.js                    |
+| 🧠 Database  | MongoDB (Mongoose ODM)                 |
+| 🎨 Frontend  | EJS + ejs-mate layouts                 |
+| 🔒 Auth      | express-session, bcrypt                |
 | 🧰 Utilities | dotenv, method-override, connect-mongo |
 
 ---
@@ -48,3 +48,4 @@ Burekaflix/
 ├── .env.sample
 ├── package.json
 └── README.md
+```

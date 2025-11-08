@@ -14,49 +14,45 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const MONGO_URI =
-  process.env.MONGO_URI ;
+const MONGO_URI = process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI);
 
 // Add a log to confirm MongoDB connection success
-mongoose.connection.on('connected', () => {
-  console.log('MongoDB connected successfully.');
+mongoose.connection.on("connected", () => {
+  console.log("MongoDB connected successfully.");
 });
 
 // Log the name of the connected database
-mongoose.connection.on('connected', async () => {
+mongoose.connection.on("connected", async () => {
   try {
     const dbName = mongoose.connection.db.databaseName;
     console.log(`Connected to MongoDB database: ${dbName}`);
   } catch (error) {
-    console.error('Failed to retrieve database name:', error);
+    console.error("Failed to retrieve database name:", error);
   }
 });
 
 // Log all collections in the connected database
-mongoose.connection.on('connected', async () => {
+mongoose.connection.on("connected", async () => {
   try {
-    const collections = await mongoose.connection.db.listCollections().toArray();
-    console.log('Collections in the database:');
+    const collections = await mongoose.connection.db
+      .listCollections()
+      .toArray();
+    console.log("Collections in the database:");
     collections.forEach((collection) => console.log(`- ${collection.name}`));
   } catch (error) {
-    console.error('Failed to list collections:', error);
+    console.error("Failed to list collections:", error);
   }
 });
 
-mongoose.connection.on('error', (err) => {
-  console.error('MongoDB connection error:', err);
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB connection error:", err);
 });
 
 app.set("views", path.join(__dirname, "src", "views"));
 app.set("view engine", "ejs");
 app.locals.basedir = app.get("views");
-
-const prefersJson = (req) =>
-  req.get("Accept")?.includes("application/json") ||
-  req.get("X-Requested-With") === "XMLHttpRequest" ||
-  req.is("application/json");
 
 app.use(
   session({
@@ -65,21 +61,18 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: MONGO_URI }),
     cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
-  })
+  }),
 );
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
-app.use((req, res, next) => {
-  req.prefersJson = Boolean(prefersJson(req));
-  res.locals.prefersJson = req.prefersJson;
-  next();
-});
 
 // serve repository root logo file (user added `logo.png` at project root)
-app.get('/logo.png', (req, res) => res.sendFile(path.join(__dirname, 'logo.png')));
+app.get("/logo.png", (req, res) =>
+  res.sendFile(path.join(__dirname, "logo.png")),
+);
 
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
@@ -102,28 +95,26 @@ app.use("/admin", admin);
 app.use("/api", api);
 
 app.get("/", (req, res) =>
-  !req.session.user ? res.redirect("/login") : res.redirect("/catalog")
+  !req.session.user ? res.redirect("/login") : res.redirect("/catalog"),
 );
 
 // Add a MongoDB connection test route
-app.get('/test-mongo', async (req, res) => {
+app.get("/test-mongo", async (req, res) => {
   try {
     await mongoose.connection.db.admin().ping();
-    res.status(200).send('MongoDB connection is working correctly.');
+    res.status(200).send("MongoDB connection is working correctly.");
   } catch (error) {
-    console.error('MongoDB connection test failed:', error);
-    res.status(500).send('MongoDB connection test failed. Check server logs for details.');
+    console.error("MongoDB connection test failed:", error);
+    res
+      .status(500)
+      .send("MongoDB connection test failed. Check server logs for details.");
   }
 });
 
-app.use((req, res) => {
-  if (req.prefersJson) return res.status(404).json({ error: "לא נמצא" });
-  return res.status(404).render("errors/404");
-});
+app.use((req, res) => res.status(404).render("errors/404"));
 
 app.use((err, req, res, next) => {
   console.error(err);
-  if (req.prefersJson) return res.status(500).json({ error: "תקלה בשרת" });
   res.status(500).render("errors/500");
 });
 

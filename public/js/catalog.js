@@ -27,7 +27,7 @@ const fetchMovies = async () => {
             <h5>${movie.title}</h5>
             <p>${movie.summary || "No description available."}</p>
           </div>
-        </div>`
+        </div>`,
         )
         .join("");
     }
