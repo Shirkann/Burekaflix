@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= pageTitle || 'סטטיסטיקות - BurekaFlix' %></title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/main.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <%- include("../partial/header", { activePage: "stats" }) %>
+
+    <main class="container py-4 stats-page">
+      <h1 class="mb-4">סטטיסטיקות</h1>
+
+      <div class="stats-grid">
+        <section class="stats-card">
+          <h2 class="h5 mb-3">קליקים על כפתור הפליי לפי תאריך</h2>
+          <p class="text-muted small">
+            הנתונים מתבססים על הפרופיל שבחרת כרגע.
+          </p>
+          <div class="chart-wrapper">
+            <canvas id="playChart" aria-label="Play button stats" role="img"></canvas>
+          </div>
+          <p id="playChartEmpty" class="text-center text-muted mt-3 d-none">
+            עדיין אין נתונים להצגה. נסו להפעיל כמה תכנים.
+          </p>
+        </section>
+
+        <section class="stats-card">
+          <h2 class="h5 mb-3">פופולריות תכנים לפי ז׳אנרים</h2>
+          <p class="text-muted small">
+            נספרת על פי מספר הפעמים שמשתמשים פתחו את דף התוכן.
+          </p>
+          <div class="chart-wrapper">
+            <canvas id="genreChart" aria-label="Genre popularity chart" role="img"></canvas>
+          </div>
+          <p id="genreChartEmpty" class="text-center text-muted mt-3 d-none">
+            עדיין אין מספיק נתונים. כנסו לכמה תכנים כדי לראות פילוח.
+          </p>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const fetchJson = async (url) => {
+        const res = await fetch(url, { headers: { Accept: "application/json" } });
+        if (!res.ok) throw new Error("Failed to fetch " + url);
+        return res.json();
+      };
+
+      const chartColors = [
+        "#007bff",
+        "#6f42c1",
+        "#20c997",
+        "#fd7e14",
+        "#dc3545",
+        "#198754",
+        "#17a2b8",
+      ];
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        const playCanvas = document.getElementById("playChart");
+        const genreCanvas = document.getElementById("genreChart");
+        const playEmpty = document.getElementById("playChartEmpty");
+        const genreEmpty = document.getElementById("genreChartEmpty");
+
+        try {
+          const [playStats, genreStats] = await Promise.all([
+            fetchJson("/api/stats/plays"),
+            fetchJson("/api/stats/genres-popularity"),
+          ]);
+
+          if (playStats.length) {
+            const labels = playStats.map((item) => item.date);
+            const counts = playStats.map((item) => item.count);
+            new Chart(playCanvas, {
+              type: "bar",
+              data: {
+                labels,
+                datasets: [
+                  {
+                    label: "קליקים ביום",
+                    data: counts,
+                    backgroundColor: "#ff4d6d",
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, precision: 0 } },
+              },
+            });
+          } else {
+            playEmpty.classList.remove("d-none");
+          }
+
+          if (genreStats.length) {
+            const labels = genreStats.map((item) => item.genre);
+            const values = genreStats.map((item) => item.total);
+            new Chart(genreCanvas, {
+              type: "pie",
+              data: {
+                labels,
+                datasets: [
+                  {
+                    data: values,
+                    backgroundColor: labels.map(
+                      (_, idx) => chartColors[idx % chartColors.length]
+                    ),
+                    borderWidth: 1,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+              },
+            });
+          } else {
+            genreEmpty.classList.remove("d-none");
+          }
+        } catch (error) {
+          console.error("Failed to load stats", error);
+          playEmpty.textContent = "שגיאה בטעינת הנתונים.";
+          genreEmpty.textContent = "שגיאה בטעינת הנתונים.";
+          playEmpty.classList.remove("d-none");
+          genreEmpty.classList.remove("d-none");
+        }
+      });
+    </script>
+  </body>
+</html>

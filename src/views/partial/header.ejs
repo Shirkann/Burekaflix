@@ -11,6 +11,12 @@
     >
       דף הבית
     </button>
+    <button
+      class="<%= (activePage === 'stats' ? 'selectedbutton' : 'headerbutton') %>"
+      onclick="location.href='/stats'"
+    >
+      סטטיסטיקות
+    </button>
     <% if (locals.currentUser?.isAdmin) { %>
       <button
         class="<%= (activePage === 'admin' ? 'selectedbutton' : 'headerbutton') %>"

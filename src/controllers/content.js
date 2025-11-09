@@ -5,7 +5,6 @@ export const details = async (req, res) => {
   try {
     const contentId = req.params.id;
 
-    // שליפת פרטי הסרט
     const content = await Content.findById(contentId);
     if (!content) return res.status(404).json({ error: "Content not found" });
 
@@ -56,13 +55,48 @@ export const unlike = async (req, res) => {
       return res.status(400).json({ error: "Content not liked" });
     }
 
-    // הסרת התוכן ממערך התכנים שאהבתי
     profile.liked.splice(index, 1);
     await user.save();
 
     res.json({ ok: true, liked: false });
   } catch (error) {
     console.error("Error in unlike:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const recordPlayClick = async (req, res) => {
+  try {
+    if (!req.session?.user || !req.session?.profile) {
+      return res.status(401).json({ error: "Missing active profile" });
+    }
+
+    const user = await User.findById(req.session.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const profile = user.profiles.id(req.session.profile);
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    if (!Array.isArray(profile.playBtnDates)) {
+      profile.playBtnDates = [];
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    const entry = profile.playBtnDates.find((d) => d.date === today);
+    if (entry) {
+      entry.count += 1;
+    } else {
+      profile.playBtnDates.push({ date: today, count: 1 });
+    }
+
+    await user.save();
+    res.json({ ok: true, date: today });
+  } catch (error) {
+    console.error("recordPlayClick failed", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

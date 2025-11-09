@@ -45,7 +45,7 @@ export const create = async (req, res) => {
   if (!profileName) {
     profileName = "פרופיל";
   }
-  user.profiles.push({ name: profileName });
+  user.profiles.push({ name: profileName, playBtnDates: [] });
   await user.save();
   return res.redirect(
     "/profiles?message=" + encodeURIComponent(profileName + " נוצר בהצלחה"),
