@@ -106,6 +106,7 @@ import catalog from "./src/routes/catalog.js";
 import content from "./src/routes/content.js";
 import admin from "./src/routes/admin.js";
 import api from "./src/routes/api.js";
+import stats from "./src/routes/stats.js";
 
 app.use("/", auth);
 app.use("/profiles", profiles);
@@ -113,6 +114,7 @@ app.use("/catalog", catalog);
 app.use("/content", content);
 app.use("/admin", admin);
 app.use("/api", api);
+app.use("/stats", stats);
 
 app.get("/", (req, res) =>
   !req.session.user ? res.redirect("/login") : res.redirect("/catalog"),

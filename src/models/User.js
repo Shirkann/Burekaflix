@@ -1,9 +1,18 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+const PlayDateSchema = new mongoose.Schema(
+  {
+    date: { type: String, required: true }, // YYYY-MM-DD
+    count: { type: Number, default: 0 },
+  },
+  { _id: false },
+);
+
 const Profile = new mongoose.Schema(
   {
     name: { type: String, required: true },
     liked: [{ type: mongoose.Schema.Types.ObjectId, ref: "Content" }],
+    playBtnDates: { type: [PlayDateSchema], default: [] },
   },
   { _id: true },
 );

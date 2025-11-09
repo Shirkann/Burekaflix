@@ -8,8 +8,10 @@ import {
   contentDetails,
   profilesHistory,
   profilesRecommendations,
+  profilePlayStats,
+  genrePopularityStats,
 } from "../controllers/api.js";
-
+import Content from "../models/Content.js";
 
 const r = Router();
 
@@ -21,6 +23,9 @@ r.get("/content/:id", auth, contentDetails); // JSON for player.ejs
 
 r.get("/profiles/history", auth, profile, profilesHistory);
 r.get("/profiles/recommendations", auth, profile, profilesRecommendations);
+
+r.get("/stats/plays", auth, profile, profilePlayStats);
+r.get("/stats/genres-popularity", auth, genrePopularityStats);
 
 // Movies API
 r.get("/movies", auth, catalogList);

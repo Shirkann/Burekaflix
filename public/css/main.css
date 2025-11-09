@@ -42,10 +42,45 @@ body {
   margin: 0 auto;
 }
 
+.stats-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 992px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.stats-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.stats-card .chart-wrapper {
+  position: relative;
+  min-height: 280px;
+  margin-top: 1rem;
+}
+
+.stats-card canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* ========= Header ========= */
 .header {
   position: sticky;
   top: 0;
+  z-index: 1000;
   background: #1976d2;
   color: #fff;
   padding: 1.2rem 2vw;

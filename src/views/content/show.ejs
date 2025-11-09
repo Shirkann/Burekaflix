@@ -212,13 +212,22 @@
 
           const playBtn = document.querySelector("#playBtn");
           if (playBtn) {
-            playBtn.addEventListener("click", () => {
+            playBtn.addEventListener("click", async () => {
               if (!c.videoUrl) {
                 alert("לא נמצא קובץ וידאו להפעלה.");
                 return;
               }
               const id = getContentIdFromPath();
-              window.location.href = "/content/" + encodeURIComponent(id) + "/player";
+              try {
+                await fetch("/content/" + encodeURIComponent(id) + "/track-play", {
+                  method: "POST",
+                  headers: { Accept: "application/json" },
+                });
+              } catch (trackErr) {
+                console.error("play tracking failed", trackErr);
+              } finally {
+                window.location.href = "/content/" + encodeURIComponent(id) + "/player";
+              }
             });
           }
         } catch (err) {
