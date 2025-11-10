@@ -73,14 +73,12 @@ export async function create(req, res) {
     stagemanager = stagemanager.trim();
 
     let imdbRating = undefined;
-    let ratingSrc = undefined;
 
     try {
       const omdbData = await fetchOmdbDetails({ title });
       if (omdbData) {
         if (typeof omdbData.imdbRating === "number") {
           imdbRating = omdbData.imdbRating;
-          ratingSrc = "OMDb";
         }
         if (!posterUrl?.trim() && omdbData.posterUrl) {
           posterUrl = omdbData.posterUrl;
@@ -102,9 +100,7 @@ export async function create(req, res) {
       videoUrl: primaryVideoFile,
       episodes: episodesList,
       wikipedia: wikipedia.trim() || undefined,
-      rating: imdbRating,
       imdb_rating: imdbRating,
-      ratingSrc,
     });
 
     return res.redirect(
