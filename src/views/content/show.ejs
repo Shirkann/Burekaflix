@@ -9,13 +9,14 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/main.css" />
-    <!-- נגן המשולב הוסר. שימוש בדף player.ejs -->
   </head>
   <body>
     <%- include("../partial/header", { activePage: "catalog" }) %>
 
     <main class="container my-4">
-      <section class="content-card bg-white rounded shadow-sm p-3 p-md-4 mx-auto">
+      <section
+        class="content-card bg-white rounded shadow-sm p-3 p-md-4 mx-auto"
+      >
         <div id="loading" class="d-flex align-items-center gap-2">
           <div class="spinner-border" role="status" aria-hidden="true"></div>
           <span>טוען תוכן…</span>
@@ -29,7 +30,6 @@
       </section>
     </main>
 
-    <!-- נגן הוסר מהדף הזה -->
 
     <script>
       const $ = (sel) => document.querySelector(sel);
@@ -60,16 +60,17 @@
       function renderContent(c) {
         const genres = Array.isArray(c.genres) ? c.genres.join(", ") : "";
         const players = Array.isArray(c.players) ? c.players.join(", ") : "";
-        const poster = c.posterUrl || "https://via.placeholder.com/320x460?text=Poster";
+        const poster =
+          c.posterUrl || "https://via.placeholder.com/320x460?text=Poster";
         const stagemanager = c.stagemanager;
-        const liked = c.likedByUser; 
-        console.log(c.likedByUser); 
+        const liked = c.likedByUser;
+        console.log(c.likedByUser);
         const imdbRating =
           typeof c.imdb_rating === "number"
             ? c.imdb_rating.toFixed(1)
             : typeof c.rating === "number"
-            ? c.rating.toFixed(1)
-            : null;
+              ? c.rating.toFixed(1)
+              : null;
 
         return `
           <div class="row g-4 align-items-start">
@@ -85,8 +86,8 @@
               <h1 class="h3 mb-2">${escapeHtml(c.title || "ללא כותרת")}</h1>
               <p class="muted mb-3">
                 ${escapeHtml(c.year ?? "")}${c.year && genres ? " • " : ""}${escapeHtml(
-          genres,
-        )}
+                  genres,
+                )}
               </p>
               <p class="muted mb-3">
                 <strong>שחקנים:</strong>
@@ -95,10 +96,10 @@
                   .map(
                     (player) =>
                       `<a href="https://he.wikipedia.org/wiki/${encodeURIComponent(
-                        player
+                        player,
                       )}" target="_blank" rel="noopener noreferrer">${escapeHtml(
-                        player
-                      )}</a>`
+                        player,
+                      )}</a>`,
                   )
                   .join(", ")}
               </p>
@@ -158,9 +159,12 @@
         show(loading);
 
         try {
-          const res = await fetchWithTimeout("/api/content/" + encodeURIComponent(id), {
-            timeout: 12000,
-          });
+          const res = await fetchWithTimeout(
+            "/api/content/" + encodeURIComponent(id),
+            {
+              timeout: 12000,
+            },
+          );
           if (!res.ok) throw new Error("Content fetch failed: " + res.status);
           const c = await res.json();
 
@@ -173,36 +177,43 @@
             likeBtn.addEventListener("click", async () => {
               likeBtn.disabled = true;
               try {
-
                 c.likedByUser = !c.likedByUser;
                 likeBtn.classList.remove("btn-outline-primary", "btn-success");
-                likeBtn.classList.add(c.likedByUser ? "btn-success" : "btn-outline-primary");
+                likeBtn.classList.add(
+                  c.likedByUser ? "btn-success" : "btn-outline-primary",
+                );
                 likeBtn.textContent = c.likedByUser ? "אהבת ❤" : "אהבתי";
 
-                // Send the request to the server
                 const r = await fetch(
-                  "/content/" + encodeURIComponent(id) + (c.likedByUser ? "/like" : "/unlike"),
+                  "/content/" +
+                    encodeURIComponent(id) +
+                    (c.likedByUser ? "/like" : "/unlike"),
                   {
                     method: "POST",
                     headers: { Accept: "application/json" },
-                  }
+                  },
                 );
 
                 if (!r.ok) {
-                  // Revert the state if the request fails
                   c.likedByUser = !c.likedByUser;
-                  likeBtn.classList.remove("btn-outline-primary", "btn-success");
-                  likeBtn.classList.add(c.likedByUser ? "btn-success" : "btn-outline-primary");
+                  likeBtn.classList.remove(
+                    "btn-outline-primary",
+                    "btn-success",
+                  );
+                  likeBtn.classList.add(
+                    c.likedByUser ? "btn-success" : "btn-outline-primary",
+                  );
                   likeBtn.textContent = c.likedByUser ? "אהבת ❤" : "אהבתי";
                   alert("שגיאה בשמירת הלייק");
                 }
               } catch (err) {
                 console.error("like request failed", err);
                 alert("שגיאה בשמירת הלייק");
-                // Revert the state in case of an error
                 c.likedByUser = !c.likedByUser;
                 likeBtn.classList.remove("btn-outline-primary", "btn-success");
-                likeBtn.classList.add(c.likedByUser ? "btn-success" : "btn-outline-primary");
+                likeBtn.classList.add(
+                  c.likedByUser ? "btn-success" : "btn-outline-primary",
+                );
                 likeBtn.textContent = c.likedByUser ? "אהבת ❤" : "אהבתי";
               } finally {
                 setTimeout(() => (likeBtn.disabled = false), 1500);
@@ -219,14 +230,18 @@
               }
               const id = getContentIdFromPath();
               try {
-                await fetch("/content/" + encodeURIComponent(id) + "/track-play", {
-                  method: "POST",
-                  headers: { Accept: "application/json" },
-                });
+                await fetch(
+                  "/content/" + encodeURIComponent(id) + "/track-play",
+                  {
+                    method: "POST",
+                    headers: { Accept: "application/json" },
+                  },
+                );
               } catch (trackErr) {
                 console.error("play tracking failed", trackErr);
               } finally {
-                window.location.href = "/content/" + encodeURIComponent(id) + "/player";
+                window.location.href =
+                  "/content/" + encodeURIComponent(id) + "/player";
               }
             });
           }
@@ -241,11 +256,6 @@
 
       load();
 
-
-
-      
-      // לוגיקת נגן הוסרה מהתבנית הזאת.
     </script>
-
   </body>
 </html>

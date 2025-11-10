@@ -34,10 +34,8 @@ r.post("/continue-watching", auth, profile, upsertContinueWatching);
 r.get("/stats/plays", auth, profile, profilePlayStats);
 r.get("/stats/genres-popularity", auth, genrePopularityStats);
 
-// Movies API
 r.get("/movies", auth, catalogList);
 
-// Get movie details by ID
 r.get("/movies/:id", async (req, res) => {
   try {
     const movie = await Content.findById(req.params.id);

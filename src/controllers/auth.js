@@ -10,17 +10,23 @@ export const loginPost = async (req, res) => {
   const password = req.body.password || "";
 
   if (!username || !password) {
-    return res.redirect("/login?error=" + encodeURIComponent("יש למלא את כל השדות"));
+    return res.redirect(
+      "/login?error=" + encodeURIComponent("יש למלא את כל השדות")
+    );
   }
 
   const user = await User.findOne({ username });
   if (!user) {
-    return res.redirect("/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים"));
+    return res.redirect(
+      "/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים")
+    );
   }
 
   const isValid = await user.verifyPassword(password);
   if (!isValid) {
-    return res.redirect("/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים"));
+    return res.redirect(
+      "/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים")
+    );
   }
 
   const isAdminUser =
@@ -45,16 +51,22 @@ export const registerPost = async (req, res) => {
   const confirmPassword = req.body.confirmPassword || "";
 
   if (!username || !password || !confirmPassword) {
-    return res.redirect("/register?error=" + encodeURIComponent("יש למלא את כל השדות"));
+    return res.redirect(
+      "/register?error=" + encodeURIComponent("יש למלא את כל השדות")
+    );
   }
 
   if (password !== confirmPassword) {
-    return res.redirect("/register?error=" + encodeURIComponent("הסיסמאות אינן תואמות"));
+    return res.redirect(
+      "/register?error=" + encodeURIComponent("הסיסמאות אינן תואמות")
+    );
   }
 
   const existing = await User.findOne({ username });
   if (existing) {
-    return res.redirect("/register?error=" + encodeURIComponent("משתמש כבר קיים"));
+    return res.redirect(
+      "/register?error=" + encodeURIComponent("משתמש כבר קיים")
+    );
   }
 
   const user = new User({ username });

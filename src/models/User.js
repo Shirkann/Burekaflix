@@ -5,7 +5,7 @@ const PlayDateSchema = new mongoose.Schema(
     date: { type: String, required: true },
     count: { type: Number, default: 0 },
   },
-  { _id: false },
+  { _id: false }
 );
 
 const ContinueWatchingSchema = new mongoose.Schema(
@@ -13,7 +13,7 @@ const ContinueWatchingSchema = new mongoose.Schema(
     videoName: { type: String, required: true },
     seconds: { type: Number, default: 0, min: 0 },
   },
-  { _id: false },
+  { _id: false }
 );
 
 const Profile = new mongoose.Schema(
@@ -23,7 +23,7 @@ const Profile = new mongoose.Schema(
     playBtnDates: { type: [PlayDateSchema], default: [] },
     continueWatching: { type: [ContinueWatchingSchema], default: [] },
   },
-  { _id: true },
+  { _id: true }
 );
 const UserSchema = new mongoose.Schema(
   {
@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema(
     isAdmin: { type: Boolean, default: false },
     profiles: { type: [Profile], default: [] },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 UserSchema.methods.setPassword = async function (pw) {
   this.passwordHash = await bcrypt.hash(pw, 10);
