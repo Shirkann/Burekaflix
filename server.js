@@ -22,7 +22,11 @@ const MONGO_URI =
   process.env.MONGO_URL ||
   FALLBACK_MONGO_URI;
 
-if (!process.env.MONGO_URI && !process.env.MONGODB_URI && !process.env.MONGO_URL) {
+if (
+  !process.env.MONGO_URI &&
+  !process.env.MONGODB_URI &&
+  !process.env.MONGO_URL
+) {
   console.warn(
     "Mongo env vars not set. Using the default connection string from .env.example.",
   );
@@ -38,12 +42,10 @@ if (!process.env.SESSION_SECRET) {
 
 mongoose.connect(MONGO_URI);
 
-// Add a log to confirm MongoDB connection success
 mongoose.connection.on("connected", () => {
   console.log("MongoDB connected successfully.");
 });
 
-// Log the name of the connected database
 mongoose.connection.on("connected", async () => {
   try {
     const dbName = mongoose.connection.db.databaseName;
@@ -53,7 +55,6 @@ mongoose.connection.on("connected", async () => {
   }
 });
 
-// Log all collections in the connected database
 mongoose.connection.on("connected", async () => {
   try {
     const collections = await mongoose.connection.db
@@ -89,7 +90,6 @@ app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
-// serve repository root logo file (user added `logo.png` at project root)
 app.get("/logo.png", (req, res) =>
   res.sendFile(path.join(__dirname, "logo.png")),
 );
@@ -120,7 +120,6 @@ app.get("/", (req, res) =>
   !req.session.user ? res.redirect("/login") : res.redirect("/catalog"),
 );
 
-// Add a MongoDB connection test route
 app.get("/test-mongo", async (req, res) => {
   try {
     await mongoose.connection.db.admin().ping();

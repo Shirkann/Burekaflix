@@ -28,13 +28,12 @@ export const create = async (req, res) => {
   const user = await User.findById(req.session.user.id);
   if (!user) {
     return res.redirect(
-      "/profiles?error=" + encodeURIComponent("משתמש לא נמצא"),
+      "/profiles?error=" + encodeURIComponent("משתמש לא נמצא")
     );
   }
   if (user.profiles.length >= 5) {
     return res.redirect(
-      "/profiles?error=" +
-        encodeURIComponent("לא ניתן ליצור יותר מ-5 פרופילים"),
+      "/profiles?error=" + encodeURIComponent("לא ניתן ליצור יותר מ-5 פרופילים")
     );
   }
   let profileName = "";
@@ -45,10 +44,14 @@ export const create = async (req, res) => {
   if (!profileName) {
     profileName = "פרופיל";
   }
-  user.profiles.push({ name: profileName, playBtnDates: [], continueWatching: [] });
+  user.profiles.push({
+    name: profileName,
+    playBtnDates: [],
+    continueWatching: [],
+  });
   await user.save();
   return res.redirect(
-    "/profiles?message=" + encodeURIComponent(profileName + " נוצר בהצלחה"),
+    "/profiles?message=" + encodeURIComponent(profileName + " נוצר בהצלחה")
   );
 };
 
@@ -61,7 +64,7 @@ export const remove = async (req, res) => {
   const user = await User.findById(req.session.user.id);
   if (!user) {
     return res.redirect(
-      "/profiles?error=" + encodeURIComponent("משתמש לא נמצא"),
+      "/profiles?error=" + encodeURIComponent("משתמש לא נמצא")
     );
   }
   const before = user.profiles.length;
@@ -70,7 +73,7 @@ export const remove = async (req, res) => {
   });
   if (user.profiles.length === before) {
     return res.redirect(
-      "/profiles?error=" + encodeURIComponent("פרופיל לא נמצא"),
+      "/profiles?error=" + encodeURIComponent("פרופיל לא נמצא")
     );
   }
   await user.save();
@@ -78,6 +81,6 @@ export const remove = async (req, res) => {
     req.session.profile = null;
   }
   return res.redirect(
-    "/profiles?message=" + encodeURIComponent("הפרופיל הוסר"),
+    "/profiles?message=" + encodeURIComponent("הפרופיל הוסר")
   );
 };

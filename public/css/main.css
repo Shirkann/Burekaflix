@@ -1,9 +1,10 @@
-/* Wider modal sizing */
-#movieDetailsModal .modal-dialog.movie-details-dialog { max-width: 1200px; }
-#movieDetailsModal .modal-body { padding-top: 0.5rem; }
-/* ========= בסיס ========= */
+#movieDetailsModal .modal-dialog.movie-details-dialog {
+  max-width: 1200px;
+}
+#movieDetailsModal .modal-body {
+  padding-top: 0.5rem;
+}
 
-/* ========= Fonts ========= */
 @font-face {
   font-family: "NotoSansHebrew";
   src: url("/fonts/NotoSansHebrew-Regular.ttf") format("truetype");
@@ -76,7 +77,6 @@ body {
   height: 100% !important;
 }
 
-/* ========= Header ========= */
 .header {
   position: sticky;
   top: 0;
@@ -140,7 +140,6 @@ button.selectedbutton {
   border: none;
 }
 
-/* ========= Hero ========= */
 .hero {
   padding: 2.5rem;
   color: #1a1a1a;
@@ -149,7 +148,6 @@ button.selectedbutton {
   text-align: center;
 }
 
-/* ========= Rows ========= */
 .row {
   margin-top: 24px;
   display: flex;
@@ -160,7 +158,6 @@ button.selectedbutton {
   margin-bottom: 2.5rem;
 }
 
-/* ========= Scroller ========= */
 .scroller {
   display: flex;
   gap: 14px;
@@ -168,7 +165,6 @@ button.selectedbutton {
   padding-bottom: 8px;
 }
 
-/* ========= Cards ========= */
 .card {
   background: #fff;
   border-radius: 8px;
@@ -193,19 +189,33 @@ button.selectedbutton {
   border-radius: 8px;
 }
 
-/* ======== Custom Video Player ======== */
-.media-container { display: flex; gap: 16px; align-items: flex-start; }
-.video-player-wrapper { position: relative; flex: 1 1 auto; min-width: 0; }
+.media-container {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.video-player-wrapper {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 .controls-bar {
   position: absolute;
-  left: 0; right: 0; bottom: 8px;
+  left: 0;
+  right: 0;
+  bottom: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: .5rem;
-  padding: .5rem .75rem;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.55) 40%, rgba(0,0,0,.8) 100%);
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.55) 40%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
   color: #fff;
 }
 
@@ -215,48 +225,74 @@ button.selectedbutton {
   background: #ffffff22;
   color: #fff;
   border-radius: 6px;
-  padding: .35rem .6rem;
+  padding: 0.35rem 0.6rem;
   cursor: pointer;
 }
-.vp-btn:hover { background: #ffffff33; }
+.vp-btn:hover {
+  background: #ffffff33;
+}
 
-.left-controls, .right-controls {
+.left-controls,
+.right-controls {
   display: flex;
   align-items: center;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 .seek-bar {
   width: clamp(120px, 30vw, 420px);
 }
 
-.time-display { font-variant-numeric: tabular-nums; min-width: 48px; text-align: center; }
+.time-display {
+  font-variant-numeric: tabular-nums;
+  min-width: 48px;
+  text-align: center;
+}
 
 .episodes-overlay {
   position: absolute;
-  right: 0; top: 0; bottom: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   width: min(320px, 85%);
   background: #111;
   color: #fff;
   border-left: 1px solid #222;
-  padding: .75rem;
+  padding: 0.75rem;
   overflow-y: auto;
-  box-shadow: -6px 0 16px rgba(0,0,0,.35);
+  box-shadow: -6px 0 16px rgba(0, 0, 0, 0.35);
 }
 .episodes-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
-.episodes-list { list-style: none; margin: 0; padding: 0; }
-.episodes-list li { padding: .5rem; border-bottom: 1px solid #222; cursor: pointer; }
-.episodes-list li:hover { background: #1b1b1b; }
-.close-overlay { background: transparent; color: #fff; border: none; cursor: pointer; font-size: 18px; }
+.episodes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.episodes-list li {
+  padding: 0.5rem;
+  border-bottom: 1px solid #222;
+  cursor: pointer;
+}
+.episodes-list li:hover {
+  background: #1b1b1b;
+}
+.close-overlay {
+  background: transparent;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
 
-/* ========= Info ========= */
 .info {
   padding: 1rem;
 }
 
-/* ========= Content Page Styles ========= */
 :root {
   --brand: #1976d2;
   --bg: #f5f5f5;
@@ -266,7 +302,6 @@ body {
   background: #f5f5f5;
 }
 
-/* Header */
 .app-header {
   background: var(--brand);
   color: #fff;
@@ -291,7 +326,6 @@ body {
   letter-spacing: 0.25px;
 }
 
-/* Poster */
 .poster {
   width: 320px;
   max-width: 100%;
@@ -301,41 +335,36 @@ body {
   background: #e9ecef;
 }
 
-/* Content card */
 .content-card {
   max-width: 980px;
 }
 
-/* Utilities */
 .muted {
   color: #6c757d;
 }
 
 .btn-close {
-  color: #1A1A1A !important;
+  color: #1a1a1a !important;
   opacity: 1 !important;
   filter: none !important;
-  margin-right: auto !important; 
-  margin-left: 0 !important; 
+  margin-right: auto !important;
+  margin-left: 0 !important;
 }
-
 
 .content-title {
-  font-family: 'NotoSansHebrew'!important;
+  font-family: "NotoSansHebrew" !important;
   font-weight: 900;
   font-size: 42px;
-  color: #1A1A1A !important;
+  color: #1a1a1a !important;
 }
 
-
 .movies-title {
-  font-family: 'NotoSansHebrew'!important;
+  font-family: "NotoSansHebrew" !important;
   font-weight: 900;
   font-size: 30px;
   color: #1a1a1a !important;
 }
 
-/* שורת קישורים מתחת לטופס ("כבר יש לכם משתמש? כניסה") */
 .form-links {
   margin-top: 12px;
   text-align: center;
@@ -347,7 +376,6 @@ body {
   text-decoration: underline;
 }
 
-/* פוטר קטן מתחת לקישורים (🇮🇱 באהבה לקולנוע הישראלי) */
 .footnote {
   margin-top: 10px;
   text-align: center;
@@ -356,7 +384,6 @@ body {
   font-size: 14px;
 }
 
-/* שיפור UX לקלטים וכפתור */
 .row input::placeholder {
   color: #7a86b6;
   opacity: 0.9;
@@ -375,23 +402,23 @@ body {
   color: #1976d2;
 }
 
-
-        .player-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-        .timeline {
-            width: 100%;
-            height: 5px;
-            background: #ccc;
-            cursor: pointer;
-        }
-        .timeline-progress {
-            height: 100%;
-            background: #007bff;
-            width: 0;
+.player-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.timeline {
+  width: 100%;
+  height: 5px;
+  background: #ccc;
+  cursor: pointer;
+}
+.timeline-progress {
+  height: 100%;
+  background: #007bff;
+  width: 0;
+}

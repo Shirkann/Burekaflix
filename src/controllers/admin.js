@@ -41,14 +41,14 @@ export async function create(req, res) {
     if (!title) {
       await cleanupUpload();
       return res.redirect(
-        "/admin/add?error=" + encodeURIComponent("נדרש שם תוכן (title)"),
+        "/admin/add?error=" + encodeURIComponent("נדרש שם תוכן (title)")
       );
     }
 
     if (!primaryVideoFile) {
       await cleanupUpload();
       return res.redirect(
-        "/admin/add?error=" + encodeURIComponent("חובה להעלות קובץ וידאו (MP4)"),
+        "/admin/add?error=" + encodeURIComponent("חובה להעלות קובץ וידאו (MP4)")
       );
     }
 
@@ -104,13 +104,13 @@ export async function create(req, res) {
     });
 
     return res.redirect(
-      "/admin/add?message=" + encodeURIComponent(doc.title + " נשמר בהצלחה"),
+      "/admin/add?message=" + encodeURIComponent(doc.title + " נשמר בהצלחה")
     );
   } catch (error) {
     console.error(error);
     await cleanupUpload();
     return res.redirect(
-      "/admin/add?error=" + encodeURIComponent("שגיאה בשמירת התוכן"),
+      "/admin/add?error=" + encodeURIComponent("שגיאה בשמירת התוכן")
     );
   }
 }

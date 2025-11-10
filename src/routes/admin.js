@@ -36,7 +36,7 @@ const singleVideoUpload = (req, res, next) => {
       console.error("Video upload failed:", err);
       return res.redirect(
         "/admin/add?error=" +
-          encodeURIComponent(err.message || "שגיאה בהעלאת קובץ הווידאו"),
+          encodeURIComponent(err.message || "שגיאה בהעלאת קובץ הווידאו")
       );
     }
     next();

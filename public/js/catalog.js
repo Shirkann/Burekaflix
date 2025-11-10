@@ -1,5 +1,3 @@
-// catalog.js - Client-side logic for the catalog page
-
 console.log("Catalog.js loaded successfully");
 
 const getInitialGenre = () => document.body?.dataset?.initialGenre || "";
@@ -15,7 +13,6 @@ const fetchMovies = async () => {
     const movies = await response.json();
     console.log("Movies fetched:", movies);
 
-    // Render movies in the #catalog-grid element
     const catalogGrid = document.querySelector("#catalog-grid");
     if (catalogGrid) {
       catalogGrid.innerHTML = movies
@@ -27,8 +24,8 @@ const fetchMovies = async () => {
             typeof movie.imdb_rating === "number"
               ? movie.imdb_rating.toFixed(1)
               : typeof movie.rating === "number"
-              ? movie.rating.toFixed(1)
-              : null;
+                ? movie.rating.toFixed(1)
+                : null;
 
           return `
         <div class="card" data-id="${movie._id}">
@@ -59,15 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   fetchMovies();
 
-  // Add click event listener to movie cards
   const catalogGrid = document.querySelector("#catalog-grid");
   if (catalogGrid) {
     catalogGrid.addEventListener("click", (event) => {
       const card = event.target.closest(".card");
       if (card) {
-        const movieId = card.dataset.id; // Assuming each card has a data-id attribute
+        const movieId = card.dataset.id;
         console.log(`Movie ID clicked: ${movieId}`);
-        // Redirect to the movie details page
         window.location.href = `/content/${movieId}`;
       }
     });

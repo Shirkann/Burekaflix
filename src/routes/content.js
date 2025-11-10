@@ -1,21 +1,23 @@
 import { Router } from "express";
 import { auth, profile } from "./guards.js";
-import { details, like, unlike, recordPlayClick } from "../controllers/content.js";
+import {
+  details,
+  like,
+  unlike,
+  recordPlayClick,
+} from "../controllers/content.js";
 
 const r = Router();
 r.use(auth);
 
-// עדכון הנתיב כך שיציג את התבנית ישירות
 r.get("/:id", profile, (req, res) => {
   res.render("content/show");
 });
 
-// דף נגן
 r.get("/:id/player", profile, (req, res) => {
   res.render("content/player");
 });
 
-// נתיב API לטעינת פרטי התוכן
 r.get("/api/:id", profile, details);
 
 r.post("/:id/like", profile, like);

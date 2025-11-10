@@ -9,12 +9,18 @@ export const details = async (req, res) => {
     if (!content) return res.status(404).json({ error: "Content not found" });
 
     if (req.session.user && req.session.profile) {
-      const user = await User.findById(req.session.user.id).populate("profiles.liked");
-      const profile = user.profiles.find((p) => String(p._id) === req.session.profile);
-      const foundItem = profile.liked.find((item) => item._id.toString() === contentId);
+      const user = await User.findById(req.session.user.id).populate(
+        "profiles.liked"
+      );
+      const profile = user.profiles.find(
+        (p) => String(p._id) === req.session.profile
+      );
+      const foundItem = profile.liked.find(
+        (item) => item._id.toString() === contentId
+      );
       content.likedByUser = !!foundItem;
     }
-    
+
     res.render("content/show", { content });
   } catch (error) {
     console.error("Error loading content details:", error);
@@ -22,8 +28,7 @@ export const details = async (req, res) => {
   }
 };
 
-export const like = async (req, res) => 
-  {
+export const like = async (req, res) => {
   const u = await User.findById(req.session.user.id);
   const p = u.profiles.find((p) => String(p._id) === req.session.profile);
   const id = req.params.id;
@@ -45,7 +50,9 @@ export const unlike = async (req, res) => {
     const user = await User.findById(req.session.user.id);
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const profile = user.profiles.find((p) => String(p._id) === req.session.profile);
+    const profile = user.profiles.find(
+      (p) => String(p._id) === req.session.profile
+    );
     if (!profile) return res.status(404).json({ error: "Profile not found" });
 
     const contentId = req.params.id;
