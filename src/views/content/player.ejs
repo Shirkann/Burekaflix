@@ -44,7 +44,125 @@
                 const timelineProgress = document.querySelector('.timeline-progress');
                 const episodeDrawer = document.getElementById('episodeDrawer');
                 const episodesList = document.getElementById('episodesList');
-                let contentData=null;
+                let contentData = null;
+
+                const progressTracker = (() => {
+                    const endpoint = '/api/continue-watching';
+                    const reportInterval = 5;
+                    let currentVideo = null;
+                    let lastReported = 0;
+
+                    async function fetchSaved(videoName) {
+                        try {
+                            const resp = await fetch(`${endpoint}/${encodeURIComponent(videoName)}`, {
+                                headers: { Accept: 'application/json' },
+                            });
+                            if (!resp.ok) {
+                                if (resp.status !== 404) {
+                                    console.warn('Failed to load saved progress', resp.status);
+                                }
+                                return 0;
+                            }
+                            const data = await resp.json();
+                            const saved = Number(data.seconds);
+                            return Number.isFinite(saved) && saved > 0 ? saved : 0;
+                        } catch (err) {
+                            console.warn('Failed to fetch saved progress', err);
+                            return 0;
+                        }
+                    }
+
+                    function seekWhenReady(seconds) {
+                        if (!seconds || seconds <= 0) return;
+                        const apply = () => {
+                            try {
+                                player.currentTime = seconds;
+                            } catch (err) {
+                                console.warn('Failed to seek saved position', err);
+                            }
+                        };
+                        if (player.readyState >= 1) {
+                            apply();
+                        } else {
+                            player.addEventListener('loadedmetadata', apply, { once: true });
+                        }
+                    }
+
+                    function sendPayload(seconds, duration) {
+                        if (!currentVideo || !Number.isFinite(seconds)) return;
+                        const payload = { videoName: currentVideo, seconds };
+                        if (Number.isFinite(duration) && duration > 0) {
+                            payload.duration = Math.floor(duration);
+                        }
+                        const body = JSON.stringify(payload);
+                        try {
+                            if (navigator.sendBeacon) {
+                                const blob = new Blob([body], { type: 'application/json' });
+                                navigator.sendBeacon(endpoint, blob);
+                            } else {
+                                fetch(endpoint, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        Accept: 'application/json',
+                                    },
+                                    body,
+                                });
+                            }
+                        } catch (err) {
+                            console.warn('Failed to send progress update', err);
+                        }
+                    }
+
+                    function start(videoName) {
+                        if (!videoName) {
+                            console.warn('Missing video file name');
+                            return false;
+                        }
+                        if (currentVideo && currentVideo !== videoName) {
+                            report(true);
+                        }
+                        currentVideo = videoName;
+                        lastReported = 0;
+                        timelineProgress.style.width = '0%';
+                        player.src = '/videos/' + encodeURIComponent(videoName);
+                        fetchSaved(videoName).then(seekWhenReady);
+                        return true;
+                    }
+
+                    function report(force = false) {
+                        if (!currentVideo) return;
+                        const current = Number(player.currentTime);
+                        if (!Number.isFinite(current) || current < 0) return;
+                        const seconds = Math.floor(current);
+                        const rawDuration = Number(player.duration);
+                        const duration =
+                            Number.isFinite(rawDuration) && rawDuration > 0 ? Math.floor(rawDuration) : 0;
+
+                        if (!force) {
+                            if (Math.abs(seconds - lastReported) < reportInterval) return;
+                            if (duration > 0 && seconds >= duration - 1) return;
+                        }
+
+                        lastReported = seconds;
+                        sendPayload(seconds, duration);
+                    }
+
+                    function complete() {
+                        if (!currentVideo) return;
+                        const rawDuration = Number(player.duration);
+                        if (!Number.isFinite(rawDuration) || rawDuration <= 0) return;
+                        const duration = Math.floor(rawDuration);
+                        lastReported = duration;
+                        sendPayload(duration, duration);
+                    }
+
+                    return { start, report, complete };
+                })();
+
+                function setVideoSource(fileName){
+                    return progressTracker.start(fileName);
+                }
 
                 async function loadContent(){
                     try{
@@ -57,12 +175,12 @@
                             episodesToggleBtn.classList.add('d-none');
                             nextEpisodeBtn.classList.add('d-none');
                                                         if(!contentData.videoUrl){throw new Error('לא נמצא קובץ וידאו');}
-                                                        player.src='/videos/'+encodeURIComponent(contentData.videoUrl);
+                                                        setVideoSource(contentData.videoUrl);
                         } else {
                                                         // סדרה: שימוש במערך episodes של שמות קבצים
                                                         if(Array.isArray(contentData.episodes) && contentData.episodes.length){
+                                                            setVideoSource(contentData.episodes[0]);
                                                             buildEpisodes(contentData.episodes);
-                                                            player.src='/videos/'+encodeURIComponent(contentData.episodes[0]);
                                                         } else {
                                                             throw new Error('לא נמצאו פרקים');
                                                         }
@@ -132,8 +250,7 @@
                             if(!btn||!contentData) return;
                             const idx=Number(btn.dataset.index);
                             const fileName=contentData.episodes[idx];
-                            if(fileName){
-                                player.src='/videos/'+encodeURIComponent(fileName);
+                            if(setVideoSource(fileName)){
                                 player.play();
                                 playPauseBtn.textContent='השהה';
                                 highlightCurrentEpisode();
@@ -145,8 +262,7 @@
                             if(!contentData||!Array.isArray(contentData.episodes)) return alert('אין פרקים');
                             const currentIndex=contentData.episodes.findIndex(fn=> player.src.includes(encodeURIComponent(fn)) || player.src.endsWith(fn));
                             const next=contentData.episodes[currentIndex+1];
-                            if(next){
-                                player.src='/videos/'+encodeURIComponent(next);
+                            if(setVideoSource(next)){
                                 player.play();
                                 playPauseBtn.textContent='השהה';
                                 highlightCurrentEpisode();
@@ -155,16 +271,28 @@
                 backBtn.addEventListener('click',()=>{history.back();});
 
         player.addEventListener('timeupdate', () => {
-            const progress = (player.currentTime / player.duration) * 100;
-            timelineProgress.style.width = `${progress}%`;
+            const duration = Number(player.duration) || 0;
+            const current = Number(player.currentTime) || 0;
+            const progress = duration > 0 ? (current / duration) * 100 : 0;
+            timelineProgress.style.width = `${Math.min(progress, 100)}%`;
             highlightCurrentEpisode();
+            progressTracker.report();
+        });
+
+        player.addEventListener('ended', () => {
+            progressTracker.complete();
         });
 
         timeline.addEventListener('click', (e) => {
             const rect = timeline.getBoundingClientRect();
             const clickPosition = e.clientX - rect.left;
             const percentage = clickPosition / rect.width;
-            player.currentTime = percentage * player.duration;
+            const duration = Number(player.duration) || 0;
+            player.currentTime = percentage * duration;
+        });
+
+        window.addEventListener('beforeunload', () => {
+            progressTracker.report(true);
         });
 
         loadContent();

@@ -10,6 +10,9 @@ import {
   profilesRecommendations,
   profilePlayStats,
   genrePopularityStats,
+  continueWatchingList,
+  continueWatchingEntry,
+  upsertContinueWatching,
 } from "../controllers/api.js";
 import Content from "../models/Content.js";
 
@@ -23,6 +26,10 @@ r.get("/content/:id", auth, contentDetails); // JSON for player.ejs
 
 r.get("/profiles/history", auth, profile, profilesHistory);
 r.get("/profiles/recommendations", auth, profile, profilesRecommendations);
+
+r.get("/continue-watching", auth, profile, continueWatchingList);
+r.get("/continue-watching/:videoName", auth, profile, continueWatchingEntry);
+r.post("/continue-watching", auth, profile, upsertContinueWatching);
 
 r.get("/stats/plays", auth, profile, profilePlayStats);
 r.get("/stats/genres-popularity", auth, genrePopularityStats);

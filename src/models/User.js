@@ -2,8 +2,16 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 const PlayDateSchema = new mongoose.Schema(
   {
-    date: { type: String, required: true }, // YYYY-MM-DD
+    date: { type: String, required: true },
     count: { type: Number, default: 0 },
+  },
+  { _id: false },
+);
+
+const ContinueWatchingSchema = new mongoose.Schema(
+  {
+    videoName: { type: String, required: true },
+    seconds: { type: Number, default: 0, min: 0 },
   },
   { _id: false },
 );
@@ -13,6 +21,7 @@ const Profile = new mongoose.Schema(
     name: { type: String, required: true },
     liked: [{ type: mongoose.Schema.Types.ObjectId, ref: "Content" }],
     playBtnDates: { type: [PlayDateSchema], default: [] },
+    continueWatching: { type: [ContinueWatchingSchema], default: [] },
   },
   { _id: true },
 );
