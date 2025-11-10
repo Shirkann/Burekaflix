@@ -1,6 +1,38 @@
 import Content from "../models/Content.js";
 import User from "../models/User.js";
 
+const PARTIAL_COMPLETION_THRESHOLD = 2; // seconds from end to consider as completed
+
+async function getProfileFromSession(req, { lean = false } = {}) {
+	try {
+		if (!req.session?.user?.id || !req.session?.profile) {
+			return { error: { status: 401, message: "Missing active profile" } };
+		}
+		const query = lean
+			? User.findById(req.session.user.id).lean()
+			: User.findById(req.session.user.id);
+		const user = await query;
+		if (!user) {
+			return { error: { status: 404, message: "User not found" } };
+		}
+		const profile = lean
+			? user?.profiles?.find?.((p) => String(p._id) === req.session.profile)
+			: user?.profiles?.id?.(req.session.profile);
+		if (!profile) {
+			return { error: { status: 404, message: "Profile not found" } };
+		}
+		return { user, profile };
+	} catch (error) {
+		return {
+			error: {
+				status: 500,
+				message: "Failed to load user profile",
+				detail: error,
+			},
+		};
+	}
+}
+
 // Catalog endpoints (minimal placeholders to avoid import errors)
 export const catalogList = async (req, res) => {
 	try {
@@ -45,6 +77,96 @@ export const newestByGenre = async (req, res) => {
 
 export const profilesHistory = async (req, res) => res.json([]);
 export const profilesRecommendations = async (req, res) => res.json([]);
+
+export const continueWatchingList = async (req, res) => {
+	try {
+		const { error, profile } = await getProfileFromSession(req, { lean: true });
+		if (error) return res.status(error.status).json({ error: error.message });
+
+		res.json(profile.continueWatching || []);
+	} catch (err) {
+		console.error("continueWatchingList failed", err);
+		res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const continueWatchingEntry = async (req, res) => {
+	try {
+		const { videoName } = req.params;
+		if (!videoName) return res.status(400).json({ error: "Missing videoName" });
+
+		const { error, profile } = await getProfileFromSession(req, { lean: true });
+		if (error) return res.status(error.status).json({ error: error.message });
+
+		const entry = (profile.continueWatching || []).find(
+			(item) => item.videoName === videoName,
+		);
+		if (!entry) return res.status(404).json({ error: "Entry not found" });
+
+		return res.json(entry);
+	} catch (err) {
+		console.error("continueWatchingEntry failed", err);
+		res.status(500).json({ error: "Internal server error" });
+	}
+};
+
+export const upsertContinueWatching = async (req, res) => {
+	try {
+		const { videoName, seconds, duration } = req.body ?? {};
+		if (!videoName || typeof seconds !== "number") {
+			return res.status(400).json({ error: "videoName and seconds are required" });
+		}
+
+		const normalizedSeconds = Math.max(0, Math.floor(seconds));
+		const durationNumber = Number(duration);
+		const isDurationValid = Number.isFinite(durationNumber) && durationNumber > 0;
+		const shouldRemove =
+			isDurationValid &&
+			normalizedSeconds >= durationNumber - PARTIAL_COMPLETION_THRESHOLD;
+
+		const { error, user, profile } = await getProfileFromSession(req, {
+			lean: false,
+		});
+		if (error) return res.status(error.status).json({ error: error.message });
+
+		if (!Array.isArray(profile.continueWatching)) {
+			profile.continueWatching = [];
+		}
+
+		const idx = profile.continueWatching.findIndex(
+			(item) => item.videoName === videoName,
+		);
+
+		if (shouldRemove) {
+			const removed = idx >= 0;
+			if (removed) {
+				profile.continueWatching.splice(idx, 1);
+			}
+			await user.save();
+			return res.json({ ok: true, removed });
+		}
+
+		if (idx >= 0) {
+			const [existing] = profile.continueWatching.splice(idx, 1);
+			existing.seconds = normalizedSeconds;
+			profile.continueWatching.push(existing);
+		} else {
+			profile.continueWatching.push({ videoName, seconds: normalizedSeconds });
+		}
+
+		// keep array reasonably small (latest 20)
+		if (profile.continueWatching.length > 20) {
+			const excess = profile.continueWatching.length - 20;
+			profile.continueWatching.splice(0, excess);
+		}
+
+		await user.save();
+		res.json({ ok: true, seconds: normalizedSeconds });
+	} catch (err) {
+		console.error("upsertContinueWatching failed", err);
+		res.status(500).json({ error: "Internal server error" });
+	}
+};
 
 // Core: get content details as JSON for player/show pages
 export const contentDetails = async (req, res) => {
