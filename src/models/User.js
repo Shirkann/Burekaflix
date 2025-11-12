@@ -12,6 +12,8 @@ const ContinueWatchingSchema = new mongoose.Schema(
   {
     videoName: { type: String, required: true },
     seconds: { type: Number, default: 0, min: 0 },
+    // optional total duration in seconds to compute percentage in UI
+    duration: { type: Number, min: 0 },
   },
   { _id: false }
 );
