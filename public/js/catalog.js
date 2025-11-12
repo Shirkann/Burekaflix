@@ -7,6 +7,7 @@ const POPULARITY_RANK_LABELS = [
 ];
 
 const getInitialGenre = () => document.body?.dataset?.initialGenre || "";
+let catalogAbortController = null;
 
 const formatRating = (item) => {
   if (typeof item?.imdb_rating === "number") return item.imdb_rating.toFixed(1);
@@ -61,7 +62,17 @@ const createRankedCardHTML = (item, rankIndex, showEpisodesCount = false) => {
 const renderCatalog = (items) => {
   const catalogGrid = document.querySelector("#catalog-grid");
   if (!catalogGrid) return;
+  if (!Array.isArray(items) || items.length === 0) {
+    catalogGrid.innerHTML = '<p class="text-muted mb-0">לא נמצאו תוצאות.</p>';
+    return;
+  }
   catalogGrid.innerHTML = items.map((item) => createCatalogCardHTML(item)).join("");
+};
+
+const setCatalogLoading = () => {
+  const catalogGrid = document.querySelector("#catalog-grid");
+  if (!catalogGrid) return;
+  catalogGrid.innerHTML = "<p>טוען...</p>";
 };
 
 const renderRankedList = (selector, items, options = {}) => {
@@ -93,19 +104,79 @@ const attachCardNavigation = (selector) => {
   });
 };
 
-const fetchMovies = async () => {
+const fetchCatalog = async ({ searchTerm = "", genre = "" } = {}) => {
   try {
-    const response = await fetch("/api/movies", {
+    setCatalogLoading();
+
+    if (catalogAbortController) {
+      catalogAbortController.abort();
+    }
+    catalogAbortController = new AbortController();
+
+    const params = new URLSearchParams();
+    if (typeof searchTerm === "string" && searchTerm.trim().length) {
+      params.set("q", searchTerm.trim());
+    }
+    if (typeof genre === "string" && genre.trim().length) {
+      params.set("genre", genre.trim());
+    }
+
+    const queryString = params.toString();
+    const url = queryString ? `/api/catalog?${queryString}` : "/api/catalog";
+
+    const response = await fetch(url, {
       headers: { Accept: "application/json" },
+      signal: catalogAbortController.signal,
     });
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const movies = await response.json();
-    console.log("Movies fetched:", movies);
+    console.log("Catalog fetched:", movies);
     renderCatalog(movies);
   } catch (error) {
-    console.error("Failed to fetch movies:", error);
+    if (error.name === "AbortError") return;
+    console.error("Failed to fetch catalog:", error);
+    renderCatalog([]);
+  }
+};
+
+const populateGenreFilter = (genres, selectedValue = "") => {
+  const genreFilter = document.getElementById("genreFilter");
+  if (!genreFilter) return;
+
+  genreFilter.innerHTML = "";
+
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "כל הז׳אנרים";
+  genreFilter.appendChild(defaultOption);
+
+  (Array.isArray(genres) ? genres : []).forEach((genre) => {
+    if (typeof genre !== "string" || !genre.trim().length) return;
+    const option = document.createElement("option");
+    option.value = genre;
+    option.textContent = genre;
+    genreFilter.appendChild(option);
+  });
+
+  if (selectedValue) {
+    genreFilter.value = selectedValue;
+  }
+};
+
+const fetchGenres = async (selectedValue = "") => {
+  try {
+    const response = await fetch("/api/genres", {
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const genres = await response.json();
+    populateGenreFilter(genres, selectedValue);
+  } catch (error) {
+    console.error("Failed to fetch genres:", error);
   }
 };
 
@@ -141,12 +212,42 @@ const fetchPopularContent = async () => {
 
 document.addEventListener("DOMContentLoaded", () => {
   const genreFilter = document.getElementById("genreFilter");
-  const initial = getInitialGenre();
-  if (genreFilter && initial) {
-    genreFilter.value = initial;
+  const searchInput = document.getElementById("q");
+  const searchForm = document.querySelector(".search-form");
+  const resetButton = document.getElementById("resetSearch");
+  const initialGenre = getInitialGenre();
+
+  if (genreFilter && initialGenre) {
+    genreFilter.value = initialGenre;
   }
 
-  fetchMovies();
+  const triggerCatalogFetch = () =>
+    fetchCatalog({
+      searchTerm: searchInput?.value?.trim() || "",
+      genre: genreFilter?.value || "",
+    });
+
+  if (searchForm) {
+    searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      triggerCatalogFetch();
+    });
+  }
+
+  if (resetButton) {
+    resetButton.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "";
+      if (genreFilter) genreFilter.value = "";
+      triggerCatalogFetch();
+    });
+  }
+
+  fetchGenres(initialGenre).finally(() => {
+    if (genreFilter && initialGenre && !genreFilter.value) {
+      genreFilter.value = initialGenre;
+    }
+    triggerCatalogFetch();
+  });
   fetchPopularContent();
 
   ["#catalog-grid", "#popular-movies-grid", "#popular-series-grid"].forEach(

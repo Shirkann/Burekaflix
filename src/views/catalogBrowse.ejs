@@ -35,17 +35,21 @@
       <p>אתר לסרטי בורקס בעיצוב מודרני שמזכיר נטפליקס.</p>
 
       <form class="search-form">
-        <input id="q" name="q" placeholder="חפש/י סרט..." />
         <select id="genreFilter">
           <option value="">כל הז׳אנרים</option>
         </select>
+        <input id="q" name="q" placeholder="חפש/י תוכן..." />
+        <button type="submit" class="btn btn-primary">חיפוש</button>
+        <button type="button" id="resetSearch" class="btn btn-outline-secondary">
+          נקה
+        </button>
       </form>
     </section>
 
     <div class="container">
-      <section class="row" id="continueRow">
-        <h3 class="movies-title">המשך צפייה</h3>
-        <div class="scroller" id="continue-grid"><p>טוען...</p></div>
+      <section class="row">
+        <h3 class="movies-title">כל התכנים</h3>
+        <div class="scroller" id="catalog-grid"><p>טוען...</p></div>
       </section>
 
       <section class="row" id="recRow">
@@ -80,16 +84,6 @@
       <section class="row" id="popularSeriesRow">
         <h3 class="movies-title">הסדרות הפופולריות</h3>
         <div class="scroller" id="popular-series-grid"><p>טוען...</p></div>
-      </section>
-
-      <section class="row">
-        <h3 class="movies-title">כל הסרטים</h3>
-        <div class="scroller" id="catalog-grid"><p>טוען...</p></div>
-      </section>
-
-      <section class="row" id="newestByGenreRow">
-        <h3>החדשים ביותר בכל ז׳אנר</h3>
-        <div id="newestByGenreContainer"></div>
       </section>
     </div>
 

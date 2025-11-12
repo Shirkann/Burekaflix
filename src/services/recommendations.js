@@ -21,20 +21,28 @@ function buildLikedIds(list) {
   return result;
 }
 
-function buildWatchedVideoNames(entries) {
+function buildWatchedVideoNames(entries, completedList = []) {
   const result = new Set();
-  if (!Array.isArray(entries)) {
-    return result;
-  }
-  for (const entry of entries) {
-    if (!entry || typeof entry.videoName !== "string") {
-      continue;
-    }
-    const cleaned = entry.videoName.trim();
-    if (cleaned) {
-      result.add(cleaned);
+  if (Array.isArray(entries)) {
+    for (const entry of entries) {
+      if (!entry || typeof entry.videoName !== "string") continue;
+      const cleaned = entry.videoName.trim();
+      if (cleaned) {
+        result.add(cleaned);
+      }
     }
   }
+
+  if (Array.isArray(completedList)) {
+    for (const item of completedList) {
+      if (typeof item !== "string") continue;
+      const cleaned = item.trim();
+      if (cleaned) {
+        result.add(cleaned);
+      }
+    }
+  }
+
   return result;
 }
 
@@ -42,7 +50,10 @@ export async function getSimpleRecommendationsForProfile(profile, limit = 5) {
   if (!profile) return [];
 
   const likedIds = buildLikedIds(profile.liked);
-  const watchedVideoNames = buildWatchedVideoNames(profile.continueWatching);
+  const watchedVideoNames = buildWatchedVideoNames(
+    profile.continueWatching,
+    profile.alreadyWatched
+  );
 
   const likedContentsPromise = likedIds.size
     ? Content.find({ _id: { $in: Array.from(likedIds) } }).lean()
