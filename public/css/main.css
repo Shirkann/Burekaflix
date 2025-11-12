@@ -175,6 +175,55 @@ button.selectedbutton {
   color: inherit;
 }
 
+.card img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+.card.ranked-card {
+  position: relative;
+}
+
+.rank-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 56px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.rank-badge.rank-1 {
+  background: linear-gradient(135deg, #fdd835, #f57f17);
+}
+
+.rank-badge.rank-2 {
+  background: linear-gradient(135deg, #cfd8dc, #90a4ae);
+}
+
+.rank-badge.rank-3 {
+  background: linear-gradient(135deg, #ffcc80, #fb8c00);
+}
+
+.rank-number {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.rank-label {
+  font-size: 0.75rem;
+}
+
 .content-movieposter {
   width: 15%;
   padding: 5px;
