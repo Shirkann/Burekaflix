@@ -17,7 +17,7 @@ const formatRating = (item) => {
 const createCatalogCardHTML = (item) => {
   const rating = formatRating(item);
   return `
-    <div class="card" data-id="${item._id}">
+    <a class="card" data-id="${item._id}" href="/content/${item._id}">
       ${item?.posterUrl ? `<img src="${item.posterUrl}" alt="${item.title}" />` : ""}
       <div class="info">
         <h5>${item.title}</h5>
@@ -28,7 +28,7 @@ const createCatalogCardHTML = (item) => {
             : ""
         }
       </div>
-    </div>`;
+    </a>`;
 };
 
 const createRankedCardHTML = (item, rankIndex, showEpisodesCount = false) => {
@@ -39,7 +39,7 @@ const createRankedCardHTML = (item, rankIndex, showEpisodesCount = false) => {
       : "";
 
   return `
-    <div class="card ranked-card" data-id="${item._id}">
+    <a class="card ranked-card" data-id="${item._id}" href="/content/${item._id}">
       <div class="rank-badge rank-${rankIndex + 1}">
         <span class="rank-number">${rankIndex + 1}</span>
         <span class="rank-label">${POPULARITY_RANK_LABELS[rankIndex] || ""}</span>
@@ -55,7 +55,7 @@ const createRankedCardHTML = (item, rankIndex, showEpisodesCount = false) => {
         }
         ${episodesInfo}
       </div>
-    </div>`;
+    </a>`;
 };
 
 const renderCatalog = (items) => {

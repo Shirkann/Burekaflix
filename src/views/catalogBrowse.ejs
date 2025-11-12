@@ -17,6 +17,17 @@
   </head>
 
   <body data-initial-genre="<%= initialGenre || '' %>">
+    <%
+      function formatContentRating(item) {
+        if (item && typeof item.imdb_rating === "number") {
+          return item.imdb_rating.toFixed(1);
+        }
+        if (item && typeof item.rating === "number") {
+          return item.rating.toFixed(1);
+        }
+        return null;
+      }
+    %>
     <%- include('header', { activePage: 'catalog' }) %>
 
     <section class="hero">
@@ -39,7 +50,26 @@
 
       <section class="row" id="recRow">
         <h3 class="movies-title">מומלץ עבורך</h3>
-        <div class="scroller" id="rec-grid"><p>טוען...</p></div>
+        <div class="scroller" id="rec-grid">
+          <% if (Array.isArray(recommendations) && recommendations.length) { %>
+            <% recommendations.forEach(function (item) { const rating = formatContentRating(item); %>
+              <a class="card" data-id="<%= item._id %>" href="/content/<%= item._id %>">
+                <% if (item && item.posterUrl) { %>
+                  <img src="<%= item.posterUrl %>" alt="<%= item.title %>" />
+                <% } %>
+                <div class="info">
+                  <h5><%= item.title %></h5>
+                  <p><%= item.summary || "No description available." %></p>
+                  <% if (rating) { %>
+                    <p class="text-muted mb-0">דירוג IMDb: <%= rating %>/10</p>
+                  <% } %>
+                </div>
+              </a>
+            <% }); %>
+          <% } else { %>
+            <p>צפו בתכנים וסמנו לייק, ונדע מה להציע לכם</p>
+          <% } %>
+        </div>
       </section>
 
       <section class="row" id="popularMoviesRow">
