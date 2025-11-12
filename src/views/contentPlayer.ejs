@@ -201,14 +201,19 @@
               Array.isArray(contentData.episodes) &&
               contentData.episodes.length
             ) {
-              setVideoSource(contentData.episodes[0]);
+              const params = new URLSearchParams(window.location.search);
+              let epIndex = Number.parseInt(params.get("ep"), 10);
+              if (!Number.isFinite(epIndex) || epIndex < 0 || epIndex >= contentData.episodes.length) {
+                epIndex = 0;
+              }
+              setVideoSource(contentData.episodes[epIndex]);
               buildEpisodes(contentData.episodes);
             } else {
               throw new Error("לא נמצאו פרקים");
             }
           }
           player.play().catch(() => {});
-          playPauseBtn.textContent = "השהה";
+          playPauseBtn.textContent = "⏸️";
         } catch (e) {
           console.error(e);
           alert(e.message);
@@ -338,8 +343,8 @@
       timeline.addEventListener("click", (e) => {
         const rect = timeline.getBoundingClientRect();
         const clickPosition = e.clientX - rect.left;
-        const percentage = clickPosition / rect.width;
         const duration = Number(player.duration) || 0;
+        const percentage = 1 - (clickPosition / rect.width);
         player.currentTime = percentage * duration;
       });
 
