@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import Content from "../models/Content.js";
-import { fetchOmdbDetails } from "../services/ratings.js";
+import { fetchOmdbDetails } from "../services/imdbRating.js";
 
 export function addForm(req, res) {
   let message = null;
