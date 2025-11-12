@@ -3,6 +3,7 @@ import { auth, profile } from "./guards.js";
 import {
   catalogList,
   genreList,
+  genreOptions,
   popular,
   newestByGenre,
   contentDetails,
@@ -19,6 +20,7 @@ import Content from "../models/Content.js";
 const r = Router();
 
 r.get("/catalog", auth, catalogList);
+r.get("/genres", auth, genreOptions);
 r.get("/genre/:genre", auth, genreList);
 r.get("/popular", auth, popular);
 r.get("/newest-by-genre", auth, newestByGenre);
