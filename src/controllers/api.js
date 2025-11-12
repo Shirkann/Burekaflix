@@ -36,7 +36,18 @@ async function getProfileFromSession(req, { lean = false } = {}) {
 
 export const catalogList = async (req, res) => {
   try {
-    const items = await Content.find({}).limit(100).lean();
+    const { q = "", genre = "" } = req.query || {};
+    const filters = {};
+
+    if (typeof q === "string" && q.trim().length) {
+      filters.title = { $regex: q.trim(), $options: "i" };
+    }
+
+    if (typeof genre === "string" && genre.trim().length) {
+      filters.genres = genre.trim();
+    }
+
+    const items = await Content.find(filters).limit(100).lean();
     res.json(items);
   } catch (e) {
     console.error("catalogList failed", e);
@@ -51,6 +62,22 @@ export const genreList = async (req, res) => {
     res.json(items);
   } catch (e) {
     console.error("genreList failed", e);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const genreOptions = async (req, res) => {
+  try {
+    const genres = await Content.distinct("genres");
+    const cleaned = (genres || [])
+      .filter((genre) => typeof genre === "string" && genre.trim().length)
+      .map((genre) => genre.trim())
+      .sort((a, b) =>
+        a.localeCompare(b, undefined, { sensitivity: "base", numeric: true })
+      );
+    res.json(cleaned);
+  } catch (e) {
+    console.error("genreOptions failed", e);
     res.status(500).json({ error: "Internal server error" });
   }
 };
