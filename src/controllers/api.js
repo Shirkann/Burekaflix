@@ -2,7 +2,13 @@ import Content from "../models/Content.js";
 import User from "../models/User.js";
 import { getSimpleRecommendationsForProfile } from "../services/recommendations.js";
 
-const PARTIAL_COMPLETION_THRESHOLD = 2; // seconds from end to consider as completed
+const PARTIAL_COMPLETION_THRESHOLD = 2;
+
+const rawGenreBatchLimit = Number(process.env.GENRE_PAGE_BATCH_LIMIT);
+let GENRE_PAGE_BATCH_LIMIT = 30;
+if (Number.isFinite(rawGenreBatchLimit) && rawGenreBatchLimit > 0) {
+  GENRE_PAGE_BATCH_LIMIT = Math.floor(rawGenreBatchLimit);
+}
 
 async function getProfileFromSession(req, { lean = false } = {}) {
   try {
@@ -32,6 +38,65 @@ async function getProfileFromSession(req, { lean = false } = {}) {
       },
     };
   }
+}
+
+function trackVideoCompletion(profile, videoName) {
+  if (!profile) {
+    return;
+  }
+  if (!Array.isArray(profile.alreadyWatched)) {
+    profile.alreadyWatched = [];
+  }
+  let cleanedVideoName = "";
+  if (typeof videoName === "string") {
+    cleanedVideoName = videoName.trim();
+  }
+  if (!cleanedVideoName) {
+    return;
+  }
+  const existingIdx = profile.alreadyWatched.findIndex(
+    (name) => name === cleanedVideoName
+  );
+  if (existingIdx >= 0) {
+    profile.alreadyWatched.splice(existingIdx, 1);
+  }
+  profile.alreadyWatched.push(cleanedVideoName);
+}
+
+function normalizeGenreParam(value) {
+  if (typeof value !== "string") return "";
+  return value.trim();
+}
+
+function buildWatchedNamesSet(entries) {
+  const set = new Set();
+  if (!Array.isArray(entries)) {
+    return set;
+  }
+  for (const entry of entries) {
+    if (typeof entry !== "string") continue;
+    const cleaned = entry.trim();
+    if (cleaned) {
+      set.add(cleaned);
+    }
+  }
+  return set;
+}
+
+function isContentMarkedWatched(content, watchedSet) {
+  if (!content || !watchedSet?.size) return false;
+  const names = [];
+  if (typeof content.videoUrl === "string" && content.videoUrl.trim().length) {
+    names.push(content.videoUrl.trim());
+  }
+  if (Array.isArray(content.episodes)) {
+    for (const ep of content.episodes) {
+      if (typeof ep === "string" && ep.trim().length) {
+        names.push(ep.trim());
+      }
+    }
+  }
+  return names.some((name) => watchedSet.has(name));
 }
 
 export const catalogList = async (req, res) => {
@@ -108,7 +173,102 @@ export const newestByGenre = async (req, res) => {
   }
 };
 
+export const genreNewest = async (req, res) => {
+  try {
+    const genre = normalizeGenreParam(req.params.genre);
+    if (!genre) {
+      return res.status(400).json({ error: "חסר שם ז׳אנר" });
+    }
+    const items = await Content.find({ genres: genre })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+    res.json(items);
+  } catch (e) {
+    console.error("genreNewest failed", e);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const genreContents = async (req, res) => {
+  try {
+    const genre = normalizeGenreParam(req.params.genre);
+    if (!genre) {
+      return res.status(400).json({ error: "חסר שם ז׳אנר" });
+    }
+
+    const { error, profile } = await getProfileFromSession(req, { lean: true });
+    if (error) {
+      return res.status(error.status).json({ error: error.message });
+    }
+
+    const sortParam = String(req.query.sort || "popularity").toLowerCase();
+    const watchedParam = String(req.query.watched || "all").toLowerCase();
+    const offset = Math.max(0, Number.parseInt(req.query.offset, 10) || 0);
+    const limit = GENRE_PAGE_BATCH_LIMIT;
+
+    const sortStage =
+      sortParam === "rating"
+        ? { imdb_rating: -1, rating: -1, popularity: -1, createdAt: -1 }
+        : { popularity: -1, createdAt: -1 };
+
+    const watchedSet = buildWatchedNamesSet(profile.alreadyWatched);
+    const watchedArray = Array.from(watchedSet);
+    const filters = { genres: genre };
+
+    if (watchedParam === "watched") {
+      if (!watchedArray.length) {
+        return res.json({ items: [], hasMore: false, nextOffset: offset });
+      }
+      filters.$or = [
+        { videoUrl: { $in: watchedArray } },
+        { episodes: { $in: watchedArray } },
+      ];
+    } else if (watchedParam === "unwatched" && watchedArray.length) {
+      filters.$nor = [
+        { videoUrl: { $in: watchedArray } },
+        { episodes: { $in: watchedArray } },
+      ];
+    }
+
+    const docs = await Content.find(filters)
+      .sort(sortStage)
+      .skip(offset)
+      .limit(limit + 1)
+      .lean();
+
+    const items = docs.slice(0, limit).map((doc) => ({
+      ...doc,
+      watched: isContentMarkedWatched(doc, watchedSet),
+    }));
+
+    const hasMore = docs.length > limit;
+    const nextOffset = offset + items.length;
+
+    res.json({ items, hasMore, nextOffset });
+  } catch (e) {
+    console.error("genreContents failed", e);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const profilesHistory = async (req, res) => res.json([]);
+
+export const profileWatchedList = async (req, res) => {
+  try {
+    const { error, profile } = await getProfileFromSession(req, { lean: true });
+    if (error) {
+      return res.status(error.status).json({ error: error.message });
+    }
+    const watched = Array.isArray(profile.alreadyWatched)
+      ? profile.alreadyWatched
+      : [];
+    res.json(watched);
+  } catch (err) {
+    console.error("profileWatchedList failed", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 export const profilesRecommendations = async (req, res) => {
   try {
     const { error, profile } = await getProfileFromSession(req, { lean: true });
@@ -191,6 +351,7 @@ export const upsertContinueWatching = async (req, res) => {
       if (removed) {
         profile.continueWatching.splice(idx, 1);
       }
+      trackVideoCompletion(profile, videoName);
       await user.save();
       return res.json({ ok: true, removed });
     }

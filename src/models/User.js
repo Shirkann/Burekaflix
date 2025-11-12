@@ -22,6 +22,7 @@ const Profile = new mongoose.Schema(
     liked: [{ type: mongoose.Schema.Types.ObjectId, ref: "Content" }],
     playBtnDates: { type: [PlayDateSchema], default: [] },
     continueWatching: { type: [ContinueWatchingSchema], default: [] },
+    alreadyWatched: { type: [String], default: [] },
   },
   { _id: true }
 );

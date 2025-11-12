@@ -48,6 +48,7 @@ export const create = async (req, res) => {
     name: profileName,
     playBtnDates: [],
     continueWatching: [],
+    alreadyWatched: [],
   });
   await user.save();
   return res.redirect(
