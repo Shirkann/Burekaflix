@@ -1,5 +1,6 @@
 import Content from "../models/Content.js";
 import User from "../models/User.js";
+import { getSimpleRecommendationsForProfile } from "../services/recommendations.js";
 
 const PARTIAL_COMPLETION_THRESHOLD = 2; // seconds from end to consider as completed
 
@@ -81,7 +82,20 @@ export const newestByGenre = async (req, res) => {
 };
 
 export const profilesHistory = async (req, res) => res.json([]);
-export const profilesRecommendations = async (req, res) => res.json([]);
+export const profilesRecommendations = async (req, res) => {
+  try {
+    const { error, profile } = await getProfileFromSession(req, { lean: true });
+    if (error) {
+      return res.status(error.status).json({ error: error.message });
+    }
+
+    const recommendations = await getSimpleRecommendationsForProfile(profile);
+    res.json(recommendations);
+  } catch (err) {
+    console.error("profilesRecommendations failed", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 export const continueWatchingList = async (req, res) => {
   try {

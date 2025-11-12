@@ -173,6 +173,7 @@ button.selectedbutton {
   overflow: hidden;
   text-decoration: none;
   color: inherit;
+  display: block;
 }
 
 .card img {
