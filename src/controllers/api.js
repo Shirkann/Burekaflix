@@ -11,36 +11,6 @@ if (Number.isFinite(rawGenreBatchLimit) && rawGenreBatchLimit > 0) {
   GENRE_PAGE_BATCH_LIMIT = Math.floor(rawGenreBatchLimit);
 }
 
-async function getProfileFromSession(req, { lean = false } = {}) {
-  try {
-    if (!req.session?.user?.id || !req.session?.profile) {
-      return { error: { status: 401, message: "Missing active profile" } };
-    }
-    const query = lean
-      ? User.findById(req.session.user.id).lean()
-      : User.findById(req.session.user.id);
-    const user = await query;
-    if (!user) {
-      return { error: { status: 404, message: "User not found" } };
-    }
-    const profile = lean
-      ? user?.profiles?.find?.((p) => String(p._id) === req.session.profile)
-      : user?.profiles?.id?.(req.session.profile);
-    if (!profile) {
-      return { error: { status: 404, message: "Profile not found" } };
-    }
-    return { user, profile };
-  } catch (error) {
-    return {
-      error: {
-        status: 500,
-        message: "Failed to load user profile",
-        detail: error,
-      },
-    };
-  }
-}
-
 function trackVideoCompletion(profile, videoName) {
   if (!profile) {
     return;
@@ -56,7 +26,7 @@ function trackVideoCompletion(profile, videoName) {
     return;
   }
   const existingIdx = profile.alreadyWatched.findIndex(
-    (name) => name === cleanedVideoName
+    (name) => name === cleanedVideoName,
   );
   if (existingIdx >= 0) {
     profile.alreadyWatched.splice(existingIdx, 1);
@@ -85,7 +55,7 @@ function buildWatchedNamesSet(entries) {
 }
 
 function isContentMarkedWatched(content, watchedSet) {
-  if (!content || !watchedSet?.size) return false;
+  if (!content || !watchedSet || watchedSet.size === 0) return false;
   const names = [];
   if (typeof content.videoUrl === "string" && content.videoUrl.trim().length) {
     names.push(content.videoUrl.trim());
@@ -98,6 +68,45 @@ function isContentMarkedWatched(content, watchedSet) {
     }
   }
   return names.some((name) => watchedSet.has(name));
+}
+
+async function getProfileFromSession(req, options = {}) {
+  const opts = options || {};
+  const lean = Boolean(opts.lean);
+
+  if (
+    !req.session ||
+    !req.session.user ||
+    !req.session.user.id ||
+    !req.session.profile
+  ) {
+    return { error: { status: 401, message: "Missing active profile" } };
+  }
+
+  let query = User.findById(req.session.user.id);
+  if (lean) {
+    query = query.lean();
+  }
+
+  const user = await query;
+  if (!user) {
+    return { error: { status: 404, message: "User not found" } };
+  }
+
+  let profile = null;
+  if (lean) {
+    const profiles = Array.isArray(user.profiles) ? user.profiles : [];
+    profile =
+      profiles.find((p) => String(p._id) === req.session.profile) || null;
+  } else if (user.profiles && typeof user.profiles.id === "function") {
+    profile = user.profiles.id(req.session.profile);
+  }
+
+  if (!profile) {
+    return { error: { status: 404, message: "Profile not found" } };
+  }
+
+  return { user, profile };
 }
 
 export const catalogList = async (req, res) => {
@@ -139,7 +148,7 @@ export const genreOptions = async (req, res) => {
       .filter((genre) => typeof genre === "string" && genre.trim().length)
       .map((genre) => genre.trim())
       .sort((a, b) =>
-        a.localeCompare(b, undefined, { sensitivity: "base", numeric: true })
+        a.localeCompare(b, undefined, { sensitivity: "base", numeric: true }),
       );
     res.json(cleaned);
   } catch (e) {
@@ -306,7 +315,7 @@ export const continueWatchingEntry = async (req, res) => {
     if (error) return res.status(error.status).json({ error: error.message });
 
     const entry = (profile.continueWatching || []).find(
-      (item) => item.videoName === videoName
+      (item) => item.videoName === videoName,
     );
     if (!entry) return res.status(404).json({ error: "Entry not found" });
 
@@ -344,7 +353,7 @@ export const upsertContinueWatching = async (req, res) => {
     }
 
     const idx = profile.continueWatching.findIndex(
-      (item) => item.videoName === videoName
+      (item) => item.videoName === videoName,
     );
 
     if (shouldRemove) {
@@ -387,18 +396,23 @@ export const contentDetails = async (req, res) => {
     const content = await Content.findByIdAndUpdate(
       id,
       { $inc: { popularity: 1 } },
-      { new: true }
+      { new: true },
     ).lean();
     if (!content) return res.status(404).json({ error: "Content not found" });
 
     let likedByUser = false;
-    if (req.session?.user && req.session?.profile) {
-      const user = await User.findById(req.session.user.id).lean();
-      const prof = user?.profiles?.find?.(
-        (p) => String(p._id) === req.session.profile
-      );
-      const liked = prof?.liked?.map?.((x) => String(x)) || [];
-      likedByUser = liked.includes(String(id));
+    const hasSessionUser =
+      req.session && req.session.user && req.session.profile;
+    if (hasSessionUser) {
+      const { error, profile } = await getProfileFromSession(req, {
+        lean: true,
+      });
+      if (!error && profile) {
+        const liked = Array.isArray(profile.liked)
+          ? profile.liked.map((item) => String(item))
+          : [];
+        likedByUser = liked.includes(String(id));
+      }
     }
 
     res.json({ ...content, likedByUser });
@@ -437,13 +451,46 @@ export const similarByGenre = async (req, res) => {
 
 export const profilePlayStats = async (req, res) => {
   try {
-    const user = await User.findById(req.session.user.id).lean();
-    if (!user) return res.status(404).json({ error: "User not found" });
+    let scope = "profile";
+    if (req.query.scope === "all") {
+      scope = "all";
+    }
 
-    const profile = user?.profiles?.find?.(
-      (p) => String(p._id) === req.session.profile
-    );
-    if (!profile) return res.status(404).json({ error: "Profile not found" });
+    if (scope === "all") {
+      const aggregated = await User.aggregate([
+        { $unwind: "$profiles" },
+        {
+          $unwind: {
+            path: "$profiles.playBtnDates",
+            preserveNullAndEmptyArrays: false,
+          },
+        },
+        {
+          $match: {
+            "profiles.playBtnDates.date": { $exists: true, $ne: "" },
+          },
+        },
+        {
+          $group: {
+            _id: "$profiles.playBtnDates.date",
+            count: { $sum: "$profiles.playBtnDates.count" },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+
+      return res.json(
+        aggregated.map((item) => ({
+          date: item._id,
+          count: item.count,
+        })),
+      );
+    }
+
+    const { error, profile } = await getProfileFromSession(req, { lean: true });
+    if (error) {
+      return res.status(error.status).json({ error: error.message });
+    }
 
     const data = (profile.playBtnDates || [])
       .slice()
@@ -460,7 +507,7 @@ export const genrePopularityStats = async (req, res) => {
   try {
     const contents = await Content.find(
       { popularity: { $gt: 0 } },
-      { genres: 1, popularity: 1 }
+      { genres: 1, popularity: 1 },
     ).lean();
 
     const totals = {};

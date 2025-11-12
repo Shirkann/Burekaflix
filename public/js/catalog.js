@@ -1,25 +1,31 @@
 console.log("Catalog.js loaded successfully");
 
-const POPULARITY_RANK_LABELS = [
-  "מקום ראשון",
-  "מקום שני",
-  "מקום שלישי",
-];
+const POPULARITY_RANK_LABELS = ["מקום ראשון", "מקום שני", "מקום שלישי"];
 
-const getInitialGenre = () => document.body?.dataset?.initialGenre || "";
+const getInitialGenre = () => {
+  if (!document.body || !document.body.dataset) {
+    return "";
+  }
+  return document.body.dataset.initialGenre || "";
+};
 let catalogAbortController = null;
 
 const formatRating = (item) => {
-  if (typeof item?.imdb_rating === "number") return item.imdb_rating.toFixed(1);
-  if (typeof item?.rating === "number") return item.rating.toFixed(1);
+  if (item && typeof item.imdb_rating === "number") {
+    return item.imdb_rating.toFixed(1);
+  }
+  if (item && typeof item.rating === "number") {
+    return item.rating.toFixed(1);
+  }
   return null;
 };
 
 const createCatalogCardHTML = (item) => {
   const rating = formatRating(item);
+  const hasPoster = item && item.posterUrl;
   return `
     <a class="card" data-id="${item._id}" href="/content/${item._id}">
-      ${item?.posterUrl ? `<img src="${item.posterUrl}" alt="${item.title}" />` : ""}
+      ${hasPoster ? `<img src="${item.posterUrl}" alt="${item.title}" />` : ""}
       <div class="info">
         <h5>${item.title}</h5>
         <p>${item.summary || "No description available."}</p>
@@ -34,6 +40,7 @@ const createCatalogCardHTML = (item) => {
 
 const createRankedCardHTML = (item, rankIndex, showEpisodesCount = false) => {
   const rating = formatRating(item);
+  const hasPoster = item && item.posterUrl;
   const episodesInfo =
     showEpisodesCount && Array.isArray(item.episodes) && item.episodes.length
       ? `<p class="text-muted mb-0">מספר פרקים: ${item.episodes.length}</p>`
@@ -45,7 +52,7 @@ const createRankedCardHTML = (item, rankIndex, showEpisodesCount = false) => {
         <span class="rank-number">${rankIndex + 1}</span>
         <span class="rank-label">${POPULARITY_RANK_LABELS[rankIndex] || ""}</span>
       </div>
-      ${item?.posterUrl ? `<img src="${item.posterUrl}" alt="${item.title}" />` : ""}
+      ${hasPoster ? `<img src="${item.posterUrl}" alt="${item.title}" />` : ""}
       <div class="info">
         <h5>${item.title}</h5>
         <p>${item.summary || "No description available."}</p>
@@ -66,7 +73,9 @@ const renderCatalog = (items) => {
     catalogGrid.innerHTML = '<p class="text-muted mb-0">לא נמצאו תוצאות.</p>';
     return;
   }
-  catalogGrid.innerHTML = items.map((item) => createCatalogCardHTML(item)).join("");
+  catalogGrid.innerHTML = items
+    .map((item) => createCatalogCardHTML(item))
+    .join("");
 };
 
 const setCatalogLoading = () => {
@@ -76,7 +85,8 @@ const setCatalogLoading = () => {
 };
 
 const renderRankedList = (selector, items, options = {}) => {
-  const { emptyMessage = "אין פריטים להצגה", showEpisodesCount = false } = options;
+  const { emptyMessage = "אין פריטים להצגה", showEpisodesCount = false } =
+    options;
   const container = document.querySelector(selector);
   if (!container) return;
 
@@ -192,7 +202,9 @@ const fetchPopularContent = async () => {
     const popularItems = await response.json();
     console.log("Popular items fetched:", popularItems);
 
-    const topMovies = popularItems.filter((item) => item.type === "movie").slice(0, 3);
+    const topMovies = popularItems
+      .filter((item) => item.type === "movie")
+      .slice(0, 3);
 
     const topSeriesWithEpisodes = popularItems
       .filter((item) => Array.isArray(item.episodes) && item.episodes.length)
@@ -221,10 +233,24 @@ document.addEventListener("DOMContentLoaded", () => {
     genreFilter.value = initialGenre;
   }
 
+  const getSearchTerm = () => {
+    if (searchInput && typeof searchInput.value === "string") {
+      return searchInput.value.trim();
+    }
+    return "";
+  };
+
+  const getSelectedGenre = () => {
+    if (genreFilter) {
+      return genreFilter.value || "";
+    }
+    return "";
+  };
+
   const triggerCatalogFetch = () =>
     fetchCatalog({
-      searchTerm: searchInput?.value?.trim() || "",
-      genre: genreFilter?.value || "",
+      searchTerm: getSearchTerm(),
+      genre: getSelectedGenre(),
     });
 
   if (searchForm) {
@@ -251,6 +277,6 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchPopularContent();
 
   ["#catalog-grid", "#popular-movies-grid", "#popular-series-grid"].forEach(
-    attachCardNavigation
+    attachCardNavigation,
   );
 });

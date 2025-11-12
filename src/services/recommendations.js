@@ -52,7 +52,7 @@ export async function getSimpleRecommendationsForProfile(profile, limit = 5) {
   const likedIds = buildLikedIds(profile.liked);
   const watchedVideoNames = buildWatchedVideoNames(
     profile.continueWatching,
-    profile.alreadyWatched
+    profile.alreadyWatched,
   );
 
   const likedContentsPromise = likedIds.size

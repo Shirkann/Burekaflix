@@ -40,36 +40,12 @@ if (!process.env.SESSION_SECRET) {
   );
 }
 
-mongoose.connect(MONGO_URI);
-
-mongoose.connection.on("connected", () => {
-  console.log("MongoDB connected successfully.");
-});
-
-mongoose.connection.on("connected", async () => {
-  try {
-    const dbName = mongoose.connection.db.databaseName;
-    console.log(`Connected to MongoDB database: ${dbName}`);
-  } catch (error) {
-    console.error("Failed to retrieve database name:", error);
-  }
-});
-
-mongoose.connection.on("connected", async () => {
-  try {
-    const collections = await mongoose.connection.db
-      .listCollections()
-      .toArray();
-    console.log("Collections in the database:");
-    collections.forEach((collection) => console.log(`- ${collection.name}`));
-  } catch (error) {
-    console.error("Failed to list collections:", error);
-  }
-});
-
-mongoose.connection.on("error", (err) => {
-  console.error("MongoDB connection error:", err);
-});
+mongoose
+  .connect(MONGO_URI)
+  .then(() => console.log("MongoDB connected."))
+  .catch((error) => {
+    console.error("Mongo connection failed:", error);
+  });
 
 app.set("views", path.join(__dirname, "src", "views"));
 app.set("view engine", "ejs");

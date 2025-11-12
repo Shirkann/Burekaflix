@@ -16,24 +16,33 @@ export const index = (req, res) => {
 };
 
 export const apiList = async (req, res) => {
-  const user = await User.findById(req.session.user.id).lean();
-  let profiles = [];
-  if (user && user.profiles) {
-    profiles = user.profiles;
+  if (!req.session || !req.session.user || !req.session.user.id) {
+    return res.status(401).json({ error: "יש להתחבר מחדש" });
   }
-  res.json(profiles);
+  const user = await User.findById(req.session.user.id).lean();
+  if (!user) {
+    return res.status(404).json({ error: "משתמש לא נמצא" });
+  }
+  res.json(user.profiles || []);
 };
 
 export const create = async (req, res) => {
+  if (!req.session || !req.session.user || !req.session.user.id) {
+    return res.redirect(
+      "/profiles?error=" + encodeURIComponent("יש להתחבר מחדש"),
+    );
+  }
   const user = await User.findById(req.session.user.id);
   if (!user) {
     return res.redirect(
-      "/profiles?error=" + encodeURIComponent("משתמש לא נמצא")
+      "/profiles?error=" + encodeURIComponent("משתמש לא נמצא"),
     );
   }
+
   if (user.profiles.length >= 5) {
     return res.redirect(
-      "/profiles?error=" + encodeURIComponent("לא ניתן ליצור יותר מ-5 פרופילים")
+      "/profiles?error=" +
+        encodeURIComponent("לא ניתן ליצור יותר מ-5 פרופילים"),
     );
   }
   let profileName = "";
@@ -52,20 +61,48 @@ export const create = async (req, res) => {
   });
   await user.save();
   return res.redirect(
-    "/profiles?message=" + encodeURIComponent(profileName + " נוצר בהצלחה")
+    "/profiles?message=" + encodeURIComponent(profileName + " נוצר בהצלחה"),
   );
 };
 
-export const select = (req, res) => {
-  req.session.profile = req.params.pid;
+export const select = async (req, res) => {
+  if (!req.session || !req.session.user || !req.session.user.id) {
+    return res.redirect(
+      "/profiles?error=" + encodeURIComponent("יש להתחבר מחדש"),
+    );
+  }
+  const user = await User.findById(req.session.user.id).lean();
+  if (!user) {
+    return res.redirect(
+      "/profiles?error=" + encodeURIComponent("משתמש לא נמצא"),
+    );
+  }
+
+  const profileId = req.params.pid;
+  const profileList = Array.isArray(user.profiles) ? user.profiles : [];
+  const hasProfile = profileList.some(
+    (profile) => String(profile._id) === profileId,
+  );
+  if (!hasProfile) {
+    return res.redirect(
+      "/profiles?error=" + encodeURIComponent("פרופיל לא נמצא"),
+    );
+  }
+
+  req.session.profile = profileId;
   res.redirect("/catalog");
 };
 
 export const remove = async (req, res) => {
+  if (!req.session || !req.session.user || !req.session.user.id) {
+    return res.redirect(
+      "/profiles?error=" + encodeURIComponent("יש להתחבר מחדש"),
+    );
+  }
   const user = await User.findById(req.session.user.id);
   if (!user) {
     return res.redirect(
-      "/profiles?error=" + encodeURIComponent("משתמש לא נמצא")
+      "/profiles?error=" + encodeURIComponent("משתמש לא נמצא"),
     );
   }
   const before = user.profiles.length;
@@ -74,7 +111,7 @@ export const remove = async (req, res) => {
   });
   if (user.profiles.length === before) {
     return res.redirect(
-      "/profiles?error=" + encodeURIComponent("פרופיל לא נמצא")
+      "/profiles?error=" + encodeURIComponent("פרופיל לא נמצא"),
     );
   }
   await user.save();
@@ -82,6 +119,6 @@ export const remove = async (req, res) => {
     req.session.profile = null;
   }
   return res.redirect(
-    "/profiles?message=" + encodeURIComponent("הפרופיל הוסר")
+    "/profiles?message=" + encodeURIComponent("הפרופיל הוסר"),
   );
 };

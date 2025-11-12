@@ -9,16 +9,16 @@ export const details = async (req, res) => {
     if (!content) return res.status(404).json({ error: "Content not found" });
 
     if (req.session.user && req.session.profile) {
-      const user = await User.findById(req.session.user.id).populate(
-        "profiles.liked"
-      );
-      const profile = user.profiles.find(
-        (p) => String(p._id) === req.session.profile
-      );
-      const foundItem = profile.liked.find(
-        (item) => item._id.toString() === contentId
-      );
-      content.likedByUser = !!foundItem;
+      const user = await User.findById(req.session.user.id).lean();
+      if (user && Array.isArray(user.profiles)) {
+        const profile = user.profiles.find(
+          (p) => String(p._id) === req.session.profile,
+        );
+        if (profile && Array.isArray(profile.liked)) {
+          const likedIds = profile.liked.map((item) => String(item));
+          content.likedByUser = likedIds.includes(String(contentId));
+        }
+      }
     }
 
     res.render("contentDetails", { content });
@@ -29,33 +29,61 @@ export const details = async (req, res) => {
 };
 
 export const like = async (req, res) => {
-  const u = await User.findById(req.session.user.id);
-  const p = u.profiles.find((p) => String(p._id) === req.session.profile);
-  const id = req.params.id;
-  const i = p.liked.findIndex((x) => String(x) === id);
-  let liked;
-  if (i >= 0) {
-    p.liked.splice(i, 1);
-    liked = false;
-  } else {
-    p.liked.push(id);
-    liked = true;
+  try {
+    if (!req.session || !req.session.user || !req.session.profile) {
+      return res.status(401).json({ error: "Missing active profile" });
+    }
+
+    const user = await User.findById(req.session.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const profile = user.profiles.id(req.session.profile);
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    if (!Array.isArray(profile.liked)) {
+      profile.liked = [];
+    }
+
+    const contentId = String(req.params.id || "");
+    const existingIndex = profile.liked.findIndex(
+      (item) => String(item) === contentId,
+    );
+    let liked;
+    if (existingIndex >= 0) {
+      profile.liked.splice(existingIndex, 1);
+      liked = false;
+    } else {
+      profile.liked.push(contentId);
+      liked = true;
+    }
+
+    await user.save();
+    res.json({ ok: true, liked });
+  } catch (error) {
+    console.error("like failed", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-  await u.save();
-  res.json({ ok: true, liked });
 };
 
 export const unlike = async (req, res) => {
   try {
+    if (!req.session || !req.session.user || !req.session.profile) {
+      return res.status(401).json({ error: "Missing active profile" });
+    }
+
     const user = await User.findById(req.session.user.id);
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const profile = user.profiles.id(req.session.profile);
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
 
-    const profile = user.profiles.find(
-      (p) => String(p._id) === req.session.profile
-    );
-    if (!profile) return res.status(404).json({ error: "Profile not found" });
-
-    const contentId = req.params.id;
+    const contentId = String(req.params.id || "");
     const index = profile.liked.findIndex((item) => String(item) === contentId);
 
     if (index === -1) {
@@ -67,14 +95,14 @@ export const unlike = async (req, res) => {
 
     res.json({ ok: true, liked: false });
   } catch (error) {
-    console.error("Error in unlike:", error);
+    console.error("unlike failed", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
 export const recordPlayClick = async (req, res) => {
   try {
-    if (!req.session?.user || !req.session?.profile) {
+    if (!req.session || !req.session.user || !req.session.profile) {
       return res.status(401).json({ error: "Missing active profile" });
     }
 
@@ -82,7 +110,6 @@ export const recordPlayClick = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
     const profile = user.profiles.id(req.session.profile);
     if (!profile) {
       return res.status(404).json({ error: "Profile not found" });

@@ -11,21 +11,21 @@ export const loginPost = async (req, res) => {
 
   if (!username || !password) {
     return res.redirect(
-      "/login?error=" + encodeURIComponent("יש למלא את כל השדות")
+      "/login?error=" + encodeURIComponent("יש למלא את כל השדות"),
     );
   }
 
   const user = await User.findOne({ username });
   if (!user) {
     return res.redirect(
-      "/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים")
+      "/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים"),
     );
   }
 
   const isValid = await user.verifyPassword(password);
   if (!isValid) {
     return res.redirect(
-      "/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים")
+      "/login?error=" + encodeURIComponent("שם משתמש או סיסמה שגויים"),
     );
   }
 
@@ -52,20 +52,20 @@ export const registerPost = async (req, res) => {
 
   if (!username || !password || !confirmPassword) {
     return res.redirect(
-      "/register?error=" + encodeURIComponent("יש למלא את כל השדות")
+      "/register?error=" + encodeURIComponent("יש למלא את כל השדות"),
     );
   }
 
   if (password !== confirmPassword) {
     return res.redirect(
-      "/register?error=" + encodeURIComponent("הסיסמאות אינן תואמות")
+      "/register?error=" + encodeURIComponent("הסיסמאות אינן תואמות"),
     );
   }
 
   const existing = await User.findOne({ username });
   if (existing) {
     return res.redirect(
-      "/register?error=" + encodeURIComponent("משתמש כבר קיים")
+      "/register?error=" + encodeURIComponent("משתמש כבר קיים"),
     );
   }
 

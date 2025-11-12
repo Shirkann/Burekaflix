@@ -21,7 +21,7 @@
         <section class="stats-card">
           <h2 class="h5 mb-3">קליקים על כפתור הפליי לפי תאריך</h2>
           <p class="text-muted small">
-            הנתונים מתבססים על הפרופיל שבחרת כרגע.
+            הגרף מציג את כל לחיצות הפליי שנאספו במערכת לאורך הזמן.
           </p>
           <div class="chart-wrapper">
             <canvas id="playChart" aria-label="Play button stats" role="img"></canvas>
@@ -71,7 +71,7 @@
 
         try {
           const [playStats, genreStats] = await Promise.all([
-            fetchJson("/api/stats/plays"),
+            fetchJson("/api/stats/plays?scope=all"),
             fetchJson("/api/stats/genres-popularity"),
           ]);
 

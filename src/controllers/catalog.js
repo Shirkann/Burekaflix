@@ -9,16 +9,25 @@ if (Number.isFinite(rawGenreBatchLimit) && rawGenreBatchLimit > 0) {
 
 async function loadInitialRecommendations(req) {
   try {
-    if (!req.session?.user?.id || !req.session?.profile) {
+    if (
+      !req.session ||
+      !req.session.user ||
+      !req.session.user.id ||
+      !req.session.profile
+    ) {
       return [];
     }
     const user = await User.findById(req.session.user.id).lean();
-    if (!user) return [];
-    const profile =
-      user.profiles?.find?.((p) => String(p._id) === req.session.profile) ||
-      null;
-    if (!profile) return [];
-    return await getSimpleRecommendationsForProfile(profile);
+    if (!user || !Array.isArray(user.profiles)) {
+      return [];
+    }
+    const profile = user.profiles.find(
+      (p) => String(p._id) === req.session.profile,
+    );
+    if (!profile) {
+      return [];
+    }
+    return getSimpleRecommendationsForProfile(profile);
   } catch (err) {
     console.error("Failed to load initial recommendations", err);
     return [];

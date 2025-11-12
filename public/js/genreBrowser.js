@@ -33,8 +33,12 @@ if (refs.allObserver) {
 }
 
 function formatRating(item) {
-  if (typeof item?.imdb_rating === "number") return item.imdb_rating.toFixed(1);
-  if (typeof item?.rating === "number") return item.rating.toFixed(1);
+  if (item && typeof item.imdb_rating === "number") {
+    return item.imdb_rating.toFixed(1);
+  }
+  if (item && typeof item.rating === "number") {
+    return item.rating.toFixed(1);
+  }
   return "";
 }
 
@@ -44,9 +48,10 @@ function createCard(item) {
     ? '<span class="badge bg-success mt-2">נצפה</span>'
     : "";
   const summary = item.summary || "תיאור לא זמין.";
-  const poster = item?.posterUrl
-    ? `<img src="${item.posterUrl}" alt="${item.title}">`
-    : "";
+  const poster =
+    item && item.posterUrl
+      ? `<img src="${item.posterUrl}" alt="${item.title}">`
+      : "";
   return `
     <a class="card" href="/content/${item._id}">
       ${poster}
@@ -142,7 +147,7 @@ async function loadGenres() {
     setStatus(
       refs.newestStatus,
       "אירעה שגיאה בטעינת רשימת הז׳אנרים. נסו לרענן.",
-      true
+      true,
     );
     console.error(err);
   }
@@ -154,7 +159,7 @@ async function loadNewest() {
   refs.newestList.innerHTML = "";
   try {
     const data = await fetchJson(
-      `/api/genres/${encodeURIComponent(state.selectedGenre)}/newest`
+      `/api/genres/${encodeURIComponent(state.selectedGenre)}/newest`,
     );
     if (!Array.isArray(data) || !data.length) {
       refs.newestList.innerHTML =
@@ -169,7 +174,7 @@ async function loadNewest() {
     setStatus(
       refs.newestStatus,
       "טעינת התכנים החדשים נכשלה. נסו שנית מאוחר יותר.",
-      true
+      true,
     );
   }
 }
@@ -196,25 +201,31 @@ async function fetchAllItems(reset = false) {
   try {
     const data = await fetchJson(
       `/api/genres/${encodeURIComponent(
-        state.selectedGenre
-      )}/contents?${params.toString()}`
+        state.selectedGenre,
+      )}/contents?${params.toString()}`,
     );
-    const items = Array.isArray(data?.items) ? data.items : [];
+    const items = data && Array.isArray(data.items) ? data.items : [];
     if (items.length) {
       refs.allList.insertAdjacentHTML(
         "beforeend",
-        items.map(createCard).join("")
+        items.map(createCard).join(""),
       );
     } else if (reset) {
       refs.allList.innerHTML =
         '<p class="text-muted mb-0">אין תכנים התואמים את הסינון.</p>';
     }
 
-    state.offset = Number(data?.nextOffset) || state.offset + items.length;
-    state.hasMore = Boolean(data?.hasMore);
+    const nextOffset =
+      data && typeof data.nextOffset !== "undefined"
+        ? Number(data.nextOffset)
+        : NaN;
+    state.offset = Number.isNaN(nextOffset)
+      ? state.offset + items.length
+      : nextOffset;
+    state.hasMore = Boolean(data && data.hasMore);
     setStatus(
       refs.allStatus,
-      state.hasMore ? "גללו מטה כדי להמשיך לטעון..." : "הגעתם לסוף הרשימה."
+      state.hasMore ? "גללו מטה כדי להמשיך לטעון..." : "הגעתם לסוף הרשימה.",
     );
 
     if (!state.hasMore && refs.allObserver) {
@@ -224,11 +235,7 @@ async function fetchAllItems(reset = false) {
     }
   } catch (err) {
     console.error(err);
-    setStatus(
-      refs.allStatus,
-      "טעינת התכנים נכשלה. נסו לרענן את העמוד.",
-      true
-    );
+    setStatus(refs.allStatus, "טעינת התכנים נכשלה. נסו לרענן את העמוד.", true);
   } finally {
     state.loading = false;
   }

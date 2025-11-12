@@ -5,7 +5,7 @@ const PlayDateSchema = new mongoose.Schema(
     date: { type: String, required: true },
     count: { type: Number, default: 0 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const ContinueWatchingSchema = new mongoose.Schema(
@@ -15,7 +15,7 @@ const ContinueWatchingSchema = new mongoose.Schema(
     // optional total duration in seconds to compute percentage in UI
     duration: { type: Number, min: 0 },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const Profile = new mongoose.Schema(
@@ -26,7 +26,7 @@ const Profile = new mongoose.Schema(
     continueWatching: { type: [ContinueWatchingSchema], default: [] },
     alreadyWatched: { type: [String], default: [] },
   },
-  { _id: true }
+  { _id: true },
 );
 const UserSchema = new mongoose.Schema(
   {
@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema(
     isAdmin: { type: Boolean, default: false },
     profiles: { type: [Profile], default: [] },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 UserSchema.methods.setPassword = async function (pw) {
   this.passwordHash = await bcrypt.hash(pw, 10);
