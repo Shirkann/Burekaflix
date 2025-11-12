@@ -4,10 +4,13 @@ import {
   catalogList,
   genreList,
   genreOptions,
+  genreNewest,
+  genreContents,
   popular,
   newestByGenre,
   contentDetails,
   profilesHistory,
+  profileWatchedList,
   profilesRecommendations,
   profilePlayStats,
   genrePopularityStats,
@@ -21,12 +24,15 @@ const r = Router();
 
 r.get("/catalog", auth, catalogList);
 r.get("/genres", auth, genreOptions);
+r.get("/genres/:genre/newest", auth, profile, genreNewest);
+r.get("/genres/:genre/contents", auth, profile, genreContents);
 r.get("/genre/:genre", auth, genreList);
 r.get("/popular", auth, popular);
 r.get("/newest-by-genre", auth, newestByGenre);
 r.get("/content/:id", auth, contentDetails); // JSON for player.ejs
 
 r.get("/profiles/history", auth, profile, profilesHistory);
+r.get("/profiles/watched", auth, profile, profileWatchedList);
 r.get("/profiles/recommendations", auth, profile, profilesRecommendations);
 
 r.get("/continue-watching", auth, profile, continueWatchingList);

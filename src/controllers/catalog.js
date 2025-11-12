@@ -1,6 +1,12 @@
 import User from "../models/User.js";
 import { getSimpleRecommendationsForProfile } from "../services/recommendations.js";
 
+const rawGenreBatchLimit = Number(process.env.GENRE_PAGE_BATCH_LIMIT);
+let GENRE_PAGE_BATCH_LIMIT = 30;
+if (Number.isFinite(rawGenreBatchLimit) && rawGenreBatchLimit > 0) {
+  GENRE_PAGE_BATCH_LIMIT = Math.floor(rawGenreBatchLimit);
+}
+
 async function loadInitialRecommendations(req) {
   try {
     if (!req.session?.user?.id || !req.session?.profile) {
@@ -34,5 +40,12 @@ export const byGenre = async (req, res) => {
     pageTitle: `ז׳אנר: ${req.params.genre}`,
     initialGenre: req.params.genre,
     recommendations,
+  });
+};
+
+export const genrePage = async (_req, res) => {
+  return res.render("genreBrowser", {
+    pageTitle: "עמוד הז׳אנרים - BurekaFlix",
+    batchLimit: GENRE_PAGE_BATCH_LIMIT,
   });
 };

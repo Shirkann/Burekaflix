@@ -71,7 +71,12 @@ export const registerPost = async (req, res) => {
 
   const user = new User({ username });
   await user.setPassword(password);
-  user.profiles.push({ name: "כללי" });
+  user.profiles.push({
+    name: "כללי",
+    playBtnDates: [],
+    continueWatching: [],
+    alreadyWatched: [],
+  });
   const isAdminUser =
     user.username === "admin" && (await user.verifyPassword("admin"));
   user.isAdmin = isAdminUser;

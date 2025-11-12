@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= pageTitle || 'עמוד הז׳אנרים - BurekaFlix' %></title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/css/main.css" />
+    <style>
+      .genre-browser .genre-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .genre-browser .genre-pill {
+        border-radius: 999px;
+        padding: 0.4rem 1.2rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: transparent;
+        color: inherit;
+        transition: all 0.2s ease;
+      }
+      .genre-browser .genre-pill.active {
+        background: #ff5c5c;
+        border-color: #ff5c5c;
+        color: #fff;
+      }
+      .genre-browser .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+      .genre-browser .cards-grid .card {
+        min-height: 100%;
+      }
+      .genre-browser .filters-group .btn {
+        border-radius: 999px !important;
+        min-width: 110px;
+        color: #1e1e1e;
+        border-color: rgba(0, 0, 0, 0.15);
+        background-color: rgba(0, 0, 0, 0.04);
+        font-weight: 600;
+        margin: 10px !important;
+      }
+      .genre-browser .filters-group .btn:hover,
+      .genre-browser .filters-group .btn:focus {
+        border-radius: 999px !important;
+        color: #000;
+        border-color: rgba(0, 0, 0, 0.4);
+        background-color: rgba(0, 0, 0, 0.08);
+      }
+      .genre-browser .filters-group .btn.active {
+        border-radius: 999px !important;
+        background: #ff5c5c;
+        border-color: #ff5c5c;
+        color: #fff;
+      }
+      .genre-browser .sort-controls {
+        flex-wrap: nowrap;
+      }
+      .genre-browser .sort-controls label {
+        font-weight: 600;
+        margin-bottom: 0;
+        white-space: nowrap;
+      }
+      .genre-browser .sort-controls select {
+        min-width: 210px;
+      }
+    </style>
+  </head>
+  <body data-batch-limit="<%= batchLimit %>">
+    <%- include('header', { activePage: 'genres' }) %>
+
+    <main class="container my-4 genre-browser">
+      <section class="hero mb-4">
+        <h1 class="movies-title mb-2">גלו תכנים לפי ז׳אנר</h1>
+        <p class="mb-0">
+          עמוד הג׳אנרים הטוב ביותר באינטרנט! בחרו ז׳אנר כדי לגלות סרטים וסדרות
+        </p>
+      </section>
+
+      <section>
+        <h2 class="h5 mb-3">ז׳אנרים</h2>
+        <div id="genreMenu" class="genre-menu" aria-label="תפריט ז׳אנרים">
+          <span class="text-muted">טוען ז׳אנרים...</span>
+        </div>
+      </section>
+
+      <section class="d-flex flex-column flex-md-row align-items-md-center gap-3 mb-4">
+        <div class="sort-controls d-flex align-items-center gap-3">
+          <label for="sortSelect">מיון לפי:</label>
+          <select id="sortSelect" class="form-select form-select-sm">
+            <option value="popularity">פופולריות</option>
+            <option value="rating">דירוג IMDb</option>
+          </select>
+        </div>
+        <div class="filters-group btn-group" role="group" aria-label="סינון לפי מצב צפייה">
+          <button type="button" class="btn btn-outline-light active" data-filter="all">
+            הכל
+          </button>
+          <button type="button" class="btn btn-outline-light" data-filter="watched">
+            נצפה
+          </button>
+          <button type="button" class="btn btn-outline-light" data-filter="unwatched">
+            טרם נצפה
+          </button>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="movies-title mb-3" id="newestTitle">החדשים בז׳אנר</h3>
+          <small class="text-muted">
+            מוצגים  <span id="newestCountLabel">10</span> פריטים
+          </small>
+        </div>
+        <div id="newestList" class="cards-grid">
+          <p class="text-muted mb-0">בחרו ז׳אנר כדי לראות תכנים חדשים.</p>
+        </div>
+        <div id="newestStatus" class="text-muted mt-2"></div>
+      </section>
+
+      <section>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="movies-title mb-3" id="allTitle">כל התכנים בז׳אנר</h3>
+          <small class="text-muted">
+             טעינה של <span id="batchCountLabel"><%= batchLimit %></span> פריטים
+          </small>
+        </div>
+        <div id="allList" class="cards-grid"></div>
+        <div id="allStatus" class="text-center text-muted py-3"></div>
+        <div id="allObserver" style="height: 1px"></div>
+      </section>
+    </main>
+
+    <script type="module" src="/js/genreBrowser.js"></script>
+  </body>
+</html>
