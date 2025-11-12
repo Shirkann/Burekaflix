@@ -463,9 +463,10 @@ body {
 }
 .timeline {
   width: 100%;
-  height: 5px;
+  height: 10px;
   background: #ccc;
   cursor: pointer;
+  direction: rtl;
 }
 .timeline-progress {
   height: 100%;
