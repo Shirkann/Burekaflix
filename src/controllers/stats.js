@@ -1,5 +1,5 @@
 export const overview = (req, res) => {
-  res.render("stats/index", {
+  res.render("statsDashboard", {
     pageTitle: "סטטיסטיקות - BurekaFlix",
   });
 };

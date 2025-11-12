@@ -15,7 +15,7 @@
     </style>
   </head>
   <body>
-    <%- include('../partial/header', { activePage: 'profiles' }) %>
+    <%- include('header', { activePage: 'profiles' }) %>
     <main class="hero" aria-label="בחירת פרופיל">
       <h1 id="greeting">שלום <%= currentUser?.username || '' %>!</h1>
       <% if (message) { %>

@@ -11,11 +11,11 @@ const r = Router();
 r.use(auth);
 
 r.get("/:id", profile, (req, res) => {
-  res.render("content/show");
+  res.render("contentDetails");
 });
 
 r.get("/:id/player", profile, (req, res) => {
-  res.render("content/player");
+  res.render("contentPlayer");
 });
 
 r.get("/api/:id", profile, details);

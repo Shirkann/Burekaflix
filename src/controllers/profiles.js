@@ -12,7 +12,7 @@ export const index = (req, res) => {
   } else {
     viewData.error = null;
   }
-  res.render("profiles/index", viewData);
+  res.render("profilesDashboard", viewData);
 };
 
 export const apiList = async (req, res) => {

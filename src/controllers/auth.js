@@ -2,7 +2,7 @@ import User from "../models/User.js";
 
 export const loginGet = (req, res) => {
   const error = req.query.error ? req.query.error : null;
-  res.render("auth/login", { error });
+  res.render("authLogin", { error });
 };
 
 export const loginPost = async (req, res) => {
@@ -42,7 +42,7 @@ export const loginPost = async (req, res) => {
 
 export const registerGet = (req, res) => {
   const error = req.query.error ? req.query.error : null;
-  res.render("auth/register", { error });
+  res.render("authRegister", { error });
 };
 
 export const registerPost = async (req, res) => {

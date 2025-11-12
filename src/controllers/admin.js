@@ -10,7 +10,7 @@ export function addForm(req, res) {
     message = "התוכן נשמר!";
   }
   const error = req.query.error ? req.query.error : null;
-  res.render("admin/add", { message, error });
+  res.render("adminAddContent", { message, error });
 }
 
 export async function create(req, res) {

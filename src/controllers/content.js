@@ -21,7 +21,7 @@ export const details = async (req, res) => {
       content.likedByUser = !!foundItem;
     }
 
-    res.render("content/show", { content });
+    res.render("contentDetails", { content });
   } catch (error) {
     console.error("Error loading content details:", error);
     res.status(500).json({ error: "Internal server error" });
