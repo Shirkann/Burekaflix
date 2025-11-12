@@ -13,7 +13,7 @@
 | Layer        | Technologies                           |
 | :----------- | :------------------------------------- |
 | 💻 Backend   | Node.js, Express.js                    |
-| 🧠 Database  | MongoDB (Mongoose ODM)                 |
+| 🧠 Database  | MongoDB                                |
 | 🎨 Frontend  | EJS + ejs-mate layouts                 |
 | 🔒 Auth      | express-session, bcrypt                |
 | 🧰 Utilities | dotenv, method-override, connect-mongo |
@@ -22,11 +22,9 @@
 
 ## 🚀 הוראות התקנה והרצה
 
-1. התקינו את התלויות: `npm install`
-2. העתיקו את קובץ ההגדרות: `cp .env.sample .env` (ב-Windows: `copy .env.sample .env`)
-3. עדכנו בקובץ `.env` את `MONGO_URI` ו-`SESSION_SECRET` (ואת שאר המשתנים במידת הצורך)
-4. (אופציונלי אך מומלץ) הריצו את היוצר לנתוני דמו: `npm run seed`
-5. הפעילו את השרת בפיתוח: `npm run dev` ונפו לכתובת http://localhost:3000
+1. התקינו את התלויות: `npm i`
+2. עדכנו בקובץ `.env` את `MONGO_URI` ו-`OMDB_API_KEY`
+3. הפעילו את השרת בפיתוח: `npm run project` ונתבו לכתובת http://localhost:3000
 
 ---
 
