@@ -23,6 +23,11 @@
         </div>
 
         <div id="contentArea" hidden></div>
+        <div id="similarSection" class="mt-4 d-none" hidden>
+          <h5 class="mb-3">תכנים דומים בז׳אנר</h5>
+          <!-- Horizontal scroll row for similar items -->
+          <div id="similarRow" class="d-flex gap-4 overflow-auto py-2"></div>
+        </div>
 
         <div id="error" class="alert alert-danger d-none" role="alert">
           אירעה שגיאה בטעינת הדף. נסו לרענן או לחזור מאוחר יותר.
@@ -57,7 +62,7 @@
         el.classList.add("d-none");
       }
 
-      function renderContent(c) {
+  function renderContent(c) {
         const genres = Array.isArray(c.genres) ? c.genres.join(", ") : "";
         const players = Array.isArray(c.players) ? c.players.join(", ") : "";
         const poster =
@@ -71,6 +76,16 @@
             : typeof c.rating === "number"
               ? c.rating.toFixed(1)
               : null;
+
+        const typeLabel = String(c.type||'').toLowerCase()==='series' ? 'סדרה 📺' : 'סרט 🎬';
+        const episodesCount = Array.isArray(c.episodes) ? c.episodes.length : 0;
+        const wikipediaHref = (() => {
+          const raw = (c.wikipedia || '').toString().trim();
+          if (!raw) return null;
+          if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+          return `https://he.wikipedia.org/wiki/${encodeURIComponent(raw)}`;
+        })();
+
 
         return `
           <div class="row g-4 align-items-start">
@@ -90,7 +105,12 @@
                 )}
               </p>
               <p class="muted mb-3">
-                <strong>שחקנים:</strong>
+                <strong>סוג:</strong> ${escapeHtml(typeLabel)}
+                ${Array.isArray(c.episodes) && episodesCount ? ` | <strong>מספר פרקים 🧩:</strong> ${episodesCount}` : ''}
+              
+              </p>
+              <p class="muted mb-3">
+                <strong>שחקנים 🎭 :</strong>
                 ${players
                   .split(", ")
                   .map(
@@ -105,31 +125,92 @@
               </p>
               ${
                 imdbRating
-                  ? `<p class="muted mb-3"><strong>דירוג IMDb:</strong> ${escapeHtml(
+                  ? `<p class="muted mb-3"><strong>דירוג ⭐:</strong> ${escapeHtml(
                       imdbRating,
                     )}/10</p>`
                   : ""
               }
 
               <p class="muted mb-3">
-                <strong>במאי:</strong>
+                <strong>במאי 🎥:</strong>
                 ${stagemanager}
               </p>
+              
 
 
               <p class="mb-4">${escapeHtml(c.summary || "")}</p>
-
-              <div class="d-flex gap-2">
-                <button id="likeBtn" class="btn ${liked ? "btn-success" : "btn-outline-primary"}" type="button" aria-label="${liked ? "הסר לייק" : "אהבתי"}">
-                  ${liked ? "אהבת ❤" : "אהבתי"}
-                </button>
-                <button id="playBtn" class="btn btn-primary" type="button" aria-label="הפעל תוכן">
-                  הפעל ▶
-                </button>
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mt-3">
+                ${wikipediaHref 
+                  ? `<a class="btn btn-outline-secondary btn-sm" href="${escapeHtml(wikipediaHref)}" target="_blank" rel="noopener noreferrer" title="פתח ויקיפדיה">
+                       ויקיפדיה 🔗
+                     </a>`
+                  : '<span></span>'}
+                <div class="d-flex gap-3">
+                  ${String(c.type||'').toLowerCase()==='series' 
+                    ? '' 
+                    : `<button id="playBtn" class="btn btn-primary" type="button" aria-label="הפעל תוכן">הפעל ▶</button>`}
+                  <button id="likeBtn" class="btn ${liked ? "btn-success" : "btn-outline-primary"}" type="button" aria-label="${liked ? "הסר לייק" : "אהבתי"}">
+                    ${liked ? "אהבת ❤" : "אהבתי"}
+                  </button>
+                </div>
               </div>
+
+              ${String(c.type||'').toLowerCase()==='series' 
+                ? `<div class="mt-3">
+                     <h6 class="mb-2">פרקים</h6>
+                     <div class="table-responsive">
+                       <table class="table table-sm align-middle mb-0">
+                         <thead>
+                           <tr>
+                             <th style="width: 40%">פרק</th>
+                             <th style="width: 35%">התקדמות</th>
+                             <th class="text-start" style="width: 25%">פעולה</th>
+                           </tr>
+                         </thead>
+                         <tbody id="episodesTbody"></tbody>
+                       </table>
+                     </div>
+                   </div>`
+                : ''}
             </div>
           </div>
         `;
+      }
+
+      function renderSimilar(items = []) {
+        const row = document.getElementById('similarRow');
+        const section = document.getElementById('similarSection');
+        if (!Array.isArray(items) || items.length === 0) {
+          section.classList.add('d-none');
+          section.hidden = true;
+          row.innerHTML = '';
+          return;
+        }
+
+        // Limit to 5 items for the UI
+        const slice = items.slice(0, 5);
+        const cards = slice
+          .map((it) => {
+            const poster = it.posterUrl || 'https://via.placeholder.com/240x360?text=Poster';
+            const title = escapeHtml(it.title || '');
+            return `
+              <div class="text-center" style="min-width:140px; max-width:160px;">
+                <a href="/content/${it._id}" class="text-decoration-none d-block">
+                  <div class="card h-100">
+                    <img src="${escapeHtml(poster)}" class="card-img-top" style="height:210px;object-fit:cover" alt="${title}" />
+                    <div class="card-body p-2">
+                      <div class="small text-truncate" title="${title}">${title}</div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            `;
+          })
+          .join('');
+
+        row.innerHTML = cards;
+        section.classList.remove('d-none');
+        section.hidden = false;
       }
 
       async function fetchWithTimeout(resource, options = {}) {
@@ -148,11 +229,28 @@
         }
       }
 
+      // Force a hard reload when user returns via browser Back/Forward cache
+      (function setupHardReloadOnBack(){
+        try {
+          const nav = (performance && performance.getEntriesByType) ? performance.getEntriesByType('navigation') : [];
+          if (nav && nav[0] && nav[0].type === 'back_forward') {
+            // If we arrived here via back/forward, force a fresh load
+            location.reload();
+          }
+        } catch(_) {}
+        window.addEventListener('pageshow', (ev) => {
+          // Some browsers (Safari/Firefox) restore from BFCache and mark persisted=true
+          if (ev.persisted) {
+            location.reload();
+          }
+        });
+      })();
+
       async function load() {
         const id = getContentIdFromPath();
         const contentArea = $("#contentArea");
         const loading = $("#loading");
-        const errorBox = $("#error");
+        const errorBox = $("#error"); 
 
         hide(contentArea);
         hide(errorBox);
@@ -245,6 +343,31 @@
               }
             });
           }
+
+          // If series: render episodes with resume info
+          if (String(c.type||'').toLowerCase()==='series') {
+            try {
+              const cwRes = await fetchWithTimeout('/api/continue-watching', { timeout: 8000 });
+              const cwList = cwRes.ok ? await cwRes.json() : [];
+              renderEpisodesList(c, cwList);
+            } catch (_e) {
+              renderEpisodesList(c, []);
+            }
+          }
+
+          // Load similar items by genre
+          try {
+            const simRes = await fetchWithTimeout(
+              "/api/content/" + encodeURIComponent(id) + "/similar",
+              { timeout: 10000 }
+            );
+            if (simRes.ok) {
+              const similar = await simRes.json();
+              renderSimilar(similar);
+            }
+          } catch (e) {
+            console.warn('similar load failed', e);
+          }
         } catch (err) {
           console.error(err);
           hide(loading);
@@ -253,6 +376,78 @@
           errorBox.hidden = false;
         }
       }
+
+function renderEpisodesList(content, cwList) {
+  const tbody = document.getElementById("episodesTbody");
+  if (!tbody) return;
+
+  const episodes = Array.isArray(content.episodes) ? content.episodes : [];
+
+  // אם אין פרקים - מציג הודעה
+  if (!episodes.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="3" class="text-muted">אין פרקים זמינים</td>
+      </tr>
+    `;
+    return;
+  }
+
+  // ממפה לפי שם קובץ כדי לקשר התקדמות
+  const byName = new Map();
+  if (Array.isArray(cwList)) {
+    cwList.forEach(item => {
+      if (item && item.videoName) byName.set(item.videoName, item);
+    });
+  }
+
+  // יוצר שורה לכל פרק
+  const rows = episodes.map((fileName, index) => {
+    const baseName = String(fileName).split("/").pop();
+    const entry = byName.get(fileName) || byName.get(baseName) || null;
+
+    const seconds = entry?.seconds || 0;
+    const duration = entry?.duration || 0;
+    const percent = duration > 0 ? Math.min(100, Math.round((seconds / duration) * 100)) : null;
+    const hasProgress = seconds > 0 && percent !== null;
+
+    const progressCell = percent !== null
+      ? `
+        <div class="progress" style="height: 8px;">
+          <div
+            class="progress-bar bg-success"
+            role="progressbar"
+            style="width: ${percent}%"
+            aria-valuenow="${percent}"
+            aria-valuemin="0"
+            aria-valuemax="100">
+          </div>
+        </div>
+        <div class="small text-muted mt-1">${percent}%</div>
+      `
+      : `<span class="text-muted">–</span>`;
+
+    const buttonLabel = hasProgress ? "המשך ▶" : "נגן ▶";
+    const buttonClass = hasProgress ? "btn-success" : "btn-primary";
+
+    return `
+      <tr>
+        <td class="text-truncate">פרק ${index + 1}</td>
+        <td>${progressCell}</td>
+        <td class="text-start">
+          <a
+            class="btn btn-sm ${buttonClass}"
+            href="/content/${encodeURIComponent(content._id)}/player?ep=${index}">
+            ${buttonLabel}
+          </a>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  tbody.innerHTML = rows;
+}
+
 
       load();
 

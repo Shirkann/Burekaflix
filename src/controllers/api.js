@@ -2,6 +2,8 @@ import Content from "../models/Content.js";
 import User from "../models/User.js";
 import { getSimpleRecommendationsForProfile } from "../services/recommendations.js";
 
+const PARTIAL_COMPLETION_THRESHOLD = 2; // seconds from end to consider as completed
+const MAX_SIMILAR_ITEMS = 5;
 const PARTIAL_COMPLETION_THRESHOLD = 2;
 
 const rawGenreBatchLimit = Number(process.env.GENRE_PAGE_BATCH_LIMIT);
@@ -359,9 +361,12 @@ export const upsertContinueWatching = async (req, res) => {
     if (idx >= 0) {
       const [existing] = profile.continueWatching.splice(idx, 1);
       existing.seconds = normalizedSeconds;
+      if (isDurationValid) existing.duration = Math.floor(durationNumber);
       profile.continueWatching.push(existing);
     } else {
-      profile.continueWatching.push({ videoName, seconds: normalizedSeconds });
+      const entry = { videoName, seconds: normalizedSeconds };
+      if (isDurationValid) entry.duration = Math.floor(durationNumber);
+      profile.continueWatching.push(entry);
     }
 
     if (profile.continueWatching.length > 20) {
@@ -400,6 +405,33 @@ export const contentDetails = async (req, res) => {
     res.json({ ...content, likedByUser });
   } catch (e) {
     console.error("contentDetails failed", e);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const similarByGenre = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const content = await Content.findById(id).lean();
+    if (!content) return res.status(404).json({ error: "Content not found" });
+
+    const genres = Array.isArray(content.genres)
+      ? content.genres.filter(Boolean)
+      : [];
+    if (!genres.length) return res.json([]);
+
+    const items = await Content.find({
+      _id: { $ne: content._id },
+      genres: { $in: genres },
+      type: { $eq: content.type },
+    })
+      .sort({ popularity: -1, createdAt: -1 })
+      .limit(MAX_SIMILAR_ITEMS)
+      .lean();
+
+    res.json(items);
+  } catch (e) {
+    console.error("similarByGenre failed", e);
     res.status(500).json({ error: "Internal server error" });
   }
 };

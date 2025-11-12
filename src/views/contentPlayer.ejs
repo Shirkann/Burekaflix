@@ -14,15 +14,16 @@
     <main class="container-fluid position-relative p-0">
       <video id="contentPlayer" class="w-100" preload="metadata"></video>
       <div class="player-controls">
-        <button id="playPauseBtn" class="btn btn-primary">נגן</button>
+        <button id="playPauseBtn" class="btn btn-primary">נגן ▶️</button>
         <button id="rewindBtn" class="btn btn-secondary">⏩ 10 שניות</button>
         <button id="forwardBtn" class="btn btn-secondary">10 שניות ⏪</button>
-        <button id="fullscreenBtn" class="btn btn-secondary">מסך מלא</button>
+        <button id="fullscreenBtn" class="btn btn-secondary">מסך מלא 🖥️</button>
         <button id="episodesToggleBtn" class="btn btn-outline-info">
           רשימת פרקים
         </button>
-        <button id="nextEpisodeBtn" class="btn btn-success">פרק הבא ▶</button>
-        <button id="backBtn" class="btn btn-outline-light">← חזרה</button>
+        <button id="nextEpisodeBtn" class="btn btn-success">פרק הבא ⏭️</button>
+        <button id="startoverBtn" class="btn btn-secondary">התחל מחדש 🔄</button>
+        <button id="backBtn" class="btn btn-outline-light">חזרה</button>
       </div>
       <div class="timeline"><div class="timeline-progress"></div></div>
       <aside
@@ -33,6 +34,8 @@
         <h6 class="border-bottom pb-2">פרקים</h6>
         <ul id="episodesList" class="list-unstyled mb-0"></ul>
       </aside>
+      <body style="visibility: hidden;">
+
     </main>
 
     <script>
@@ -53,6 +56,7 @@
       const timelineProgress = document.querySelector(".timeline-progress");
       const episodeDrawer = document.getElementById("episodeDrawer");
       const episodesList = document.getElementById("episodesList");
+      const startoverBtn = document.getElementById("startoverBtn");
       let contentData = null;
 
       const progressTracker = (() => {
@@ -178,7 +182,8 @@
         return progressTracker.start(fileName);
       }
 
-      async function loadContent() {
+      async function loadContent() 
+      {
         try {
           const id = getId();
           const resp = await fetch("/api/content/" + encodeURIComponent(id));
@@ -208,6 +213,8 @@
           console.error(e);
           alert(e.message);
         }
+        document.body.style.visibility = "visible";
+
       }
 
       function buildEpisodes(list) {
@@ -254,10 +261,10 @@
       playPauseBtn.addEventListener("click", () => {
         if (player.paused) {
           player.play();
-          playPauseBtn.textContent = "השהה";
+          playPauseBtn.textContent = "⏸️";
         } else {
           player.pause();
-          playPauseBtn.textContent = "נגן";
+          playPauseBtn.textContent = "▶️";
         }
       });
 
@@ -267,6 +274,10 @@
 
       forwardBtn.addEventListener("click", () => {
         player.currentTime = Math.min(player.duration, player.currentTime + 10);
+      });
+
+        startoverBtn.addEventListener("click", () => {
+        player.currentTime = 0;
       });
 
       fullscreenBtn.addEventListener("click", () => {
