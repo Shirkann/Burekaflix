@@ -4,7 +4,6 @@ import { getSimpleRecommendationsForProfile } from "../services/recommendations.
 
 const PARTIAL_COMPLETION_THRESHOLD = 2; // seconds from end to consider as completed
 const MAX_SIMILAR_ITEMS = 5;
-const PARTIAL_COMPLETION_THRESHOLD = 2;
 
 const rawGenreBatchLimit = Number(process.env.GENRE_PAGE_BATCH_LIMIT);
 let GENRE_PAGE_BATCH_LIMIT = 30;
