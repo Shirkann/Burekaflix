@@ -16,7 +16,6 @@
 | 🧠 Database  | MongoDB                                |
 | 🎨 Frontend  | EJS + ejs-mate layouts                 |
 | 🔒 Auth      | express-session, bcrypt                |
-| 🧰 Utilities | dotenv, method-override, connect-mongo |
 
 ---
 
