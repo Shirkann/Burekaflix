@@ -16,6 +16,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const MONGO_URI = process.env.MONGO_URI;
 const SESSION_SECRET = process.env.SESSION_SECRET;
+const PORT = process.env.PORT;
 
 mongoose
   .connect(MONGO_URI)
@@ -91,7 +92,5 @@ app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).render("errors/500");
 });
-
-const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => console.log("BurekaFlix ▶ http://localhost:" + PORT));
