@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><%= pageTitle || 'Catalog - BurekaFlix' %></title>
+    <title>קטלוג - BurekaFlix</title>
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -14,6 +14,8 @@
     <script type="module" src="/js/catalog.js"></script>
 
     <link rel="stylesheet" href="/css/main.css" />
+    <link rel="icon" href="/logo.png" type="image/png">
+
   </head>
 
   <body data-initial-genre="<%= initialGenre || '' %>">
@@ -31,8 +33,7 @@
     <%- include('header', { activePage: 'catalog' }) %>
 
     <section class="hero">
-      <h2 class="movies-title">כחול-לבן, טעים ומצחיק</h2>
-      <p>אתר לסרטי בורקס בעיצוב מודרני שמזכיר נטפליקס.</p>
+      <h2 class="movies-title">כחול-לבן, טעים ונוח</h2>
 
       <form class="search-form">
         <select id="genreFilter">
