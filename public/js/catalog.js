@@ -1,5 +1,3 @@
-console.log("Catalog.js loaded successfully");
-
 const POPULARITY_RANK_LABELS = ["מקום ראשון", "מקום שני", "מקום שלישי"];
 
 const getInitialGenre = () => {
@@ -142,7 +140,6 @@ const fetchCatalog = async ({ searchTerm = "", genre = "" } = {}) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const movies = await response.json();
-    console.log("Catalog fetched:", movies);
     renderCatalog(movies);
   } catch (error) {
     if (error.name === "AbortError") return;
@@ -200,7 +197,6 @@ const fetchPopularContent = async () => {
     }
 
     const popularItems = await response.json();
-    console.log("Popular items fetched:", popularItems);
 
     const topMovies = popularItems
       .filter((item) => item.type === "movie")
