@@ -16,8 +16,6 @@ import admin from "./src/routes/admin.js";
 import api from "./src/routes/api.js";
 import stats from "./src/routes/stats.js";
 
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -25,6 +23,8 @@ const app = express();
 const MONGO_URI = process.env.MONGO_URI;
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const PORT = process.env.PORT;
+
+dotenv.config();
 
 mongoose
   .connect(MONGO_URI)
