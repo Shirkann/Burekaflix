@@ -14,13 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const FALLBACK_MONGO_URI =
-  "mongodb+srv://admin_burekaflix:admin@burekaflix.c97tbrj.mongodb.net/burekaflix";
-const MONGO_URI =
-  process.env.MONGO_URI ||
-  process.env.MONGODB_URI ||
-  process.env.MONGO_URL ||
-  FALLBACK_MONGO_URI;
+const MONGO_URI = process.env.MONGO_URI;
 
 if (
   !process.env.MONGO_URI &&
