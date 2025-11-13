@@ -15,20 +15,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const MONGO_URI = process.env.MONGO_URI;
-
-if (!process.env.MONGO_URI) {
-  console.warn(
-    "Mongo env vars not set. Using the default connection string from .env.example.",
-  );
-}
-
-const SESSION_SECRET = process.env.SESSION_SECRET || "change_if_needed";
-
-if (!process.env.SESSION_SECRET) {
-  console.warn(
-    "SESSION_SECRET not set. Using the default fallback value; update your .env for production.",
-  );
-}
+const SESSION_SECRET = process.env.SESSION_SECRET;
 
 mongoose
   .connect(MONGO_URI)
