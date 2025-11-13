@@ -1,10 +1,14 @@
 # 🎬 BurekaFlix - Full Stack (Node + Express + MongoDB)
 
 👨🏻‍🏫 **מרצה**
+```
 `דניאל מרגולין`
 
 👾 **סטודנטים**
-`שירן לוי (ת״ז: 324127315)` + `לירון דבח (ת״ז: 322439027)`
+```
+`שירן לוי (ת״ז: 324127315)`
+```
+`לירון דבח (ת״ז: 322439027)`
 
 ---
 פרויקט **בורקאפליקס** הוא מערכת צפייה וניהול תוכן בהשראת Netflix 🍿  
@@ -45,9 +49,8 @@ Burekaflix/
 │   ├── routes/          # Express routers למודולים (auth/admin/catalog)
 │   ├── models/          # סכמות Mongoose עבור משתמשים ותוכן
 │   ├── services/        # אינטגרציות (OMDb, המלצות)
-│   ├── utils/           # עזרי שרת
 │   └── views/           # תבניות EJS וניהול layout
-├── .env.sample
+├── .env.example
 ├── package.json
 └── README.md
 ```
