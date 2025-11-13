@@ -8,6 +8,14 @@ import methodOverride from "method-override";
 import mongoose from "mongoose";
 import { fileURLToPath } from "url";
 
+import auth from "./src/routes/auth.js";
+import profiles from "./src/routes/profiles.js";
+import catalog from "./src/routes/catalog.js";
+import content from "./src/routes/content.js";
+import admin from "./src/routes/admin.js";
+import api from "./src/routes/api.js";
+import stats from "./src/routes/stats.js";
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -53,14 +61,6 @@ app.use((req, res, next) => {
   res.locals.currentProfile = req.session.profile || null;
   next();
 });
-
-import auth from "./src/routes/auth.js";
-import profiles from "./src/routes/profiles.js";
-import catalog from "./src/routes/catalog.js";
-import content from "./src/routes/content.js";
-import admin from "./src/routes/admin.js";
-import api from "./src/routes/api.js";
-import stats from "./src/routes/stats.js";
 
 app.use("/", auth);
 app.use("/profiles", profiles);
