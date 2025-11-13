@@ -16,11 +16,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const MONGO_URI = process.env.MONGO_URI;
 
-if (
-  !process.env.MONGO_URI &&
-  !process.env.MONGODB_URI &&
-  !process.env.MONGO_URL
-) {
+if (!process.env.MONGO_URI) {
   console.warn(
     "Mongo env vars not set. Using the default connection string from .env.example.",
   );
